@@ -83,14 +83,14 @@ Please use vision-relay to compare before.png and after.png.
 
 ### Supported Vision Models
 
-Any vision-capable model works. Common choices:
+This project does **not** limit which model you can use. **Any vision-capable model** accessible through your relay API works — as long as it supports image input.
 
-| Format | Models |
-|--------|--------|
-| Anthropic | `claude-sonnet-4-6`, `claude-opus-4-6` |
-| OpenAI | `gpt-4o`, `gemini-2.5-pro`, `glm-4v`, `glm-4.5v` |
+The model is entirely determined by what you set in `VISION_MODEL`. For example:
 
-Check your relay provider's documentation for the exact supported model list.
+- **Anthropic format** — `claude-sonnet-4-6`, `claude-opus-4-6`, or any other Claude model that accepts images
+- **OpenAI format** — `gpt-4o`, `gpt-4o-mini`, `gemini-2.5-pro`, `glm-4v`, `glm-4.5v`, or any other vision model your relay provides
+
+Just set `VISION_MODEL` to whatever your relay supports — check your relay provider's model list for details.
 
 ### Provider Configuration
 
@@ -272,14 +272,14 @@ claude mcp list
 
 ### 支持的视觉模型
 
-任何支持图片输入的模型都可以。常见选择：
+本项目**不限制**你用什么模型。只要是**支持图片输入的视觉模型**，且你的中转站能访问到，就可以用。
 
-| 格式 | 适用模型 |
-|------|----------|
-| Anthropic | `claude-sonnet-4-6`、`claude-opus-4-6` |
-| OpenAI | `gpt-4o`、`gemini-2.5-pro`、`glm-4v`、`glm-4.5v` |
+模型完全由你设置的 `VISION_MODEL` 决定。举个例子：
 
-具体以你的中转站后台支持列表为准。
+- **Anthropic 格式** — `claude-sonnet-4-6`、`claude-opus-4-6`，或者任何支持图片的 Claude 模型
+- **OpenAI 格式** — `gpt-4o`、`gpt-4o-mini`、`gemini-2.5-pro`、`glm-4v`、`glm-4.5v`，或者你的中转站提供的任何其他视觉模型
+
+把你中转站支持的视觉模型名填到 `VISION_MODEL` 就行，具体去你的中转站后台看支持列表。
 
 ### 中转站配置
 
