@@ -76,7 +76,7 @@ claude mcp add -s user vision-relay `
 Open your user-level Claude Code config file:
 
 ```powershell
-notepad "$env:USERPROFILE\.claude\claude.json"
+notepad "$env:USERPROFILE\.claude.json"
 ```
 
 Add the `vision-relay` entry under `mcpServers`:
@@ -291,7 +291,7 @@ claude mcp add -s user vision-relay `
 打开用户级配置文件：
 
 ```powershell
-notepad "$env:USERPROFILE\.claude\claude.json"
+notepad "$env:USERPROFILE\.claude.json"
 ```
 
 在 `mcpServers` 下添加 `vision-relay`：
