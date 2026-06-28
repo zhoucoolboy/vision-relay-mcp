@@ -45,6 +45,8 @@ You use a cheap or text-only model for coding. When you need image analysis, thi
 - Claude Code or another MCP-compatible client
 - A relay API key for a vision-capable model
 
+> ⚠️ Note: The model you set in `VISION_MODEL` must actually support vision input. A text-only model will not work even if the API connection succeeds.
+
 ### Quick Start
 
 ```powershell
@@ -125,7 +127,7 @@ You can also explicitly call it:
 ```
 Please call vision-relay to analyze screenshot.png.
 Please use vision-relay to compare before.png and after.png.
-
+```
 
 ### Supported Vision Models
 
@@ -202,6 +204,17 @@ Claude Code (MCP Client)
         ▼
   Vision model returns analysis
 ```
+
+### In a Nutshell
+
+```text
+Claude Code writes your code.
+vision-relay handles the images.
+The vision model reads the images.
+The relay API forwards the requests.
+```
+
+Most of the time, just put an image in your project and ask Claude Code about it — it will auto-invoke vision-relay. Try it out!
 
 ### Uninstall
 
