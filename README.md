@@ -52,20 +52,64 @@ You use a cheap or text-only model for coding. When you need image analysis, thi
 git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
 cd vision-relay-mcp
 npm install
-
-# 2. Configure environment variables (Anthropic-style relay)
-[Environment]::SetEnvironmentVariable("VISION_PROVIDER", "anthropic", "User")
-[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://your-relay.example.com", "User")
-[Environment]::SetEnvironmentVariable("VISION_MODEL", "claude-sonnet-4-6", "User")
-[Environment]::SetEnvironmentVariable("VISION_API_KEY", "your_api_key_here", "User")
-
-# 3. Register with Claude Code
-claude mcp add -s user vision-relay -- node "%CD%\index.js"
-
-# 4. Verify
-claude mcp list
-# You should see: vision-relay ... Connected
 ```
+
+Then choose one of the two methods below to register the MCP server with Claude Code.
+
+### Add to Claude Code
+
+#### Method A: CLI (recommended)
+
+Run this in the project directory:
+
+```powershell
+claude mcp add -s user vision-relay `
+  -e VISION_PROVIDER=anthropic `
+  -e VISION_BASE_URL=https://your-relay.example.com `
+  -e VISION_MODEL=claude-sonnet-4-6 `
+  -e VISION_API_KEY=your_api_key_here `
+  -- node "%CD%\index.js"
+```
+
+#### Method B: Edit `.claude.json` directly
+
+Open your user-level Claude Code config file:
+
+```powershell
+notepad "$env:USERPROFILE\.claude\claude.json"
+```
+
+Add the `vision-relay` entry under `mcpServers`:
+
+```json
+{
+  "mcpServers": {
+    "vision-relay": {
+      "command": "node",
+      "args": ["D:\\software\\Desktop\\vision-relay-mcp\\index.js"],
+      "env": {
+        "VISION_PROVIDER": "anthropic",
+        "VISION_BASE_URL": "https://your-relay.example.com",
+        "VISION_MODEL": "claude-sonnet-4-6",
+        "VISION_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+> Replace the `args` path with the actual path to `index.js` on your machine.
+
+#### Verify
+
+```powershell
+claude mcp list
+claude mcp get vision-relay
+```
+
+You should see `vision-relay` with `Connected` status.
+
+> **Note:** After changing environment variables or `.claude.json`, restart Claude Code for the changes to take effect.
 
 ### Usage
 
@@ -92,49 +136,37 @@ The model is entirely determined by what you set in `VISION_MODEL`. For example:
 
 Just set `VISION_MODEL` to whatever your relay supports — check your relay provider's model list for details.
 
-### Provider Configuration
+### Environment Variables Reference
 
-#### Anthropic-Compatible Relay
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VISION_PROVIDER` | Yes | `anthropic` or `openai` — selects the API format |
+| `VISION_BASE_URL` | Yes | Your relay API base URL |
+| `VISION_MODEL` | Yes | Model name for vision analysis |
+| `VISION_API_KEY` | Yes | Your relay API key |
+| `VISION_MAX_TOKENS` | No | Max tokens for the vision response (default: `2000`) |
 
-For Claude-style relays that expose `/v1/messages`:
+How to set these values depends on which method you chose above:
+- **Method A (CLI)** — values are stored via `claude mcp add -e`. Update them with `claude mcp remove` then `claude mcp add` again.
+- **Method B (`.claude.json`)** — values are in the `env` block. Edit the JSON file directly.
 
-```powershell
-[Environment]::SetEnvironmentVariable("VISION_PROVIDER", "anthropic", "User")
-[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://your-relay.example.com", "User")
-[Environment]::SetEnvironmentVariable("VISION_MODEL", "claude-sonnet-4-6", "User")
-[Environment]::SetEnvironmentVariable("VISION_API_KEY", "your_api_key_here", "User")
-```
-
-#### OpenAI-Compatible Relay
-
-For relays that expose `/v1/chat/completions`:
-
-```powershell
-[Environment]::SetEnvironmentVariable("VISION_PROVIDER", "openai", "User")
-[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://your-relay.example.com/v1", "User")
-[Environment]::SetEnvironmentVariable("VISION_MODEL", "your-vision-model", "User")
-[Environment]::SetEnvironmentVariable("VISION_API_KEY", "your_api_key_here", "User")
-```
-
-Restart Claude Code after changing environment variables.
-
-#### Optional: VISION_MAX_TOKENS
-
-```powershell
-[Environment]::SetEnvironmentVariable("VISION_MAX_TOKENS", "4000", "User")
-```
-
-Defaults to `2000` if not set.
+> **For OpenAI-compatible relays:** set `VISION_PROVIDER=openai` and make sure `VISION_BASE_URL` ends with `/v1` or `/v1/chat/completions`.
 
 ### Switching Models
 
-Change the model via environment variable:
+**Method A (CLI):** remove and re-add:
 
 ```powershell
-[Environment]::SetEnvironmentVariable("VISION_MODEL", "claude-opus-4-6", "User")
+claude mcp remove vision-relay -s user
+claude mcp add -s user vision-relay `
+  -e VISION_PROVIDER=anthropic `
+  -e VISION_BASE_URL=https://your-relay.example.com `
+  -e VISION_MODEL=claude-opus-4-6 `
+  -e VISION_API_KEY=your_api_key_here `
+  -- node "%CD%\index.js"
 ```
 
-Then restart Claude Code.
+**Method B (`.claude.json`):** edit the `VISION_MODEL` value in the `env` block directly, then restart Claude Code.
 
 ### Troubleshooting
 
@@ -235,20 +267,64 @@ Vision Relay MCP 解决了一个普遍痛点：
 git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
 cd vision-relay-mcp
 npm install
-
-# 2. 配置环境变量（Anthropic 格式中转站）
-[Environment]::SetEnvironmentVariable("VISION_PROVIDER", "anthropic", "User")
-[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://你的中转站地址", "User")
-[Environment]::SetEnvironmentVariable("VISION_MODEL", "你的视觉模型名", "User")
-[Environment]::SetEnvironmentVariable("VISION_API_KEY", "你的API密钥", "User")
-
-# 3. 注册到 Claude Code
-claude mcp add -s user vision-relay -- node "%CD%\index.js"
-
-# 4. 验证
-claude mcp list
-# 看到 vision-relay ... Connected 就说明成功了
 ```
+
+然后从下面两种注册方式中选一种。
+
+### 注册到 Claude Code
+
+#### 方式 A：CLI 命令（推荐）
+
+在项目目录下执行：
+
+```powershell
+claude mcp add -s user vision-relay `
+  -e VISION_PROVIDER=anthropic `
+  -e VISION_BASE_URL=https://你的中转站地址 `
+  -e VISION_MODEL=你的视觉模型名 `
+  -e VISION_API_KEY=你的API密钥 `
+  -- node "%CD%\index.js"
+```
+
+#### 方式 B：直接编辑 `.claude.json`
+
+打开用户级配置文件：
+
+```powershell
+notepad "$env:USERPROFILE\.claude\claude.json"
+```
+
+在 `mcpServers` 下添加 `vision-relay`：
+
+```json
+{
+  "mcpServers": {
+    "vision-relay": {
+      "command": "node",
+      "args": ["D:\\software\\Desktop\\vision-relay-mcp\\index.js"],
+      "env": {
+        "VISION_PROVIDER": "anthropic",
+        "VISION_BASE_URL": "https://你的中转站地址",
+        "VISION_MODEL": "你的视觉模型名",
+        "VISION_API_KEY": "你的API密钥"
+      }
+    }
+  }
+}
+```
+
+> 把 `args` 里的路径换成你电脑上 `index.js` 的实际路径。
+
+#### 验证
+
+```powershell
+claude mcp list
+claude mcp get vision-relay
+```
+
+看到 `vision-relay ... Connected` 就说明成功了。
+
+> **注意：** 修改环境变量或 `.claude.json` 之后，需要重启 Claude Code 才能生效。
 
 ### 使用方式
 
@@ -281,65 +357,45 @@ claude mcp list
 
 把你中转站支持的视觉模型名填到 `VISION_MODEL` 就行，具体去你的中转站后台看支持列表。
 
-### 中转站配置
+### 环境变量参考
 
-#### Anthropic 格式中转站
+| 变量 | 必填 | 说明 |
+|------|------|------|
+| `VISION_PROVIDER` | 是 | `anthropic` 或 `openai`，选择 API 格式 |
+| `VISION_BASE_URL` | 是 | 你的中转站地址 |
+| `VISION_MODEL` | 是 | 视觉模型名称 |
+| `VISION_API_KEY` | 是 | 中转站 API 密钥 |
+| `VISION_MAX_TOKENS` | 否 | 视觉模型最大返回 token 数（默认 `2000`） |
 
-适用于 Claude Code 用的 `/v1/messages` 接口：
+这些值的设置方式取决于你上面选的是哪种注册方式：
+- **方式 A（CLI）** — 参数通过 `claude mcp add -e` 存储。想修改就先 `claude mcp remove` 再重新 `claude mcp add`。
+- **方式 B（`.claude.json`）** — 参数在 `env` 块里，直接编辑 JSON 文件即可。
 
-```powershell
-[Environment]::SetEnvironmentVariable("VISION_PROVIDER", "anthropic", "User")
-[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://你的中转站地址", "User")
-[Environment]::SetEnvironmentVariable("VISION_MODEL", "你的视觉模型名", "User")
-[Environment]::SetEnvironmentVariable("VISION_API_KEY", "你的API密钥", "User")
-```
+> **OpenAI 格式中转站：** 把 `VISION_PROVIDER` 设为 `openai`，`VISION_BASE_URL` 通常以 `/v1` 或 `/v1/chat/completions` 结尾。
 
-#### OpenAI 格式中转站
-
-适用于 `/v1/chat/completions` 接口（OpenAI 兼容）：
-
-```powershell
-[Environment]::SetEnvironmentVariable("VISION_PROVIDER", "openai", "User")
-[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://你的中转站地址/v1", "User")
-[Environment]::SetEnvironmentVariable("VISION_MODEL", "你的视觉模型名", "User")
-[Environment]::SetEnvironmentVariable("VISION_API_KEY", "你的API密钥", "User")
-```
-
-设置完成后重启 Claude Code。
-
-#### 可选：VISION_MAX_TOKENS
-
-```powershell
-[Environment]::SetEnvironmentVariable("VISION_MAX_TOKENS", "4000", "User")
-```
-
-不设置则默认为 `2000`。
+`VISION_MAX_TOKENS` 是可选变量，不设置则默认为 `2000`。如需调整，在 CLI 方式中加 `-e VISION_MAX_TOKENS=4000`，或在 `.claude.json` 的 `env` 块中添加即可。
 
 ### 换模型
 
-想把 Sonnet 换成 Opus：
+**方式 A（CLI）：** 先删除再重新添加：
 
 ```powershell
-[Environment]::SetEnvironmentVariable("VISION_MODEL", "claude-opus-4-6", "User")
+claude mcp remove vision-relay -s user
+claude mcp add -s user vision-relay `
+  -e VISION_PROVIDER=anthropic `
+  -e VISION_BASE_URL=https://你的中转站地址 `
+  -e VISION_MODEL=claude-opus-4-6 `
+  -e VISION_API_KEY=你的API密钥 `
+  -- node "%CD%\index.js"
 ```
 
-重启 Claude Code 即可。
+**方式 B（`.claude.json`）：** 直接编辑 `env` 块里的 `VISION_MODEL` 值，保存后重启 Claude Code 即可。
 
 ### 换中转站
 
-改地址：
+**方式 A（CLI）：** 删掉重新添加，换掉 `VISION_BASE_URL` 或 `VISION_API_KEY`。
 
-```powershell
-[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://新的中转站地址", "User")
-```
-
-改密钥：
-
-```powershell
-[Environment]::SetEnvironmentVariable("VISION_API_KEY", "新的密钥", "User")
-```
-
-重启 Claude Code 即可。
+**方式 B（`.claude.json`）：** 直接编辑 `env` 块里的对应字段，保存后重启 Claude Code。
 
 ### 常见问题
 
