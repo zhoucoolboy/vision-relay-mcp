@@ -373,8 +373,6 @@ claude mcp get vision-relay
 
 > **OpenAI 格式中转站：** 把 `VISION_PROVIDER` 设为 `openai`，`VISION_BASE_URL` 通常以 `/v1` 或 `/v1/chat/completions` 结尾。
 
-`VISION_MAX_TOKENS` 是可选变量，不设置则默认为 `2000`。如需调整，在 CLI 方式中加 `-e VISION_MAX_TOKENS=4000`，或在 `.claude.json` 的 `env` 块中添加即可。
-
 ### 换模型
 
 **方式 A（CLI）：** 先删除再重新添加：
