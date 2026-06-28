@@ -1,52 +1,102 @@
-# Vision Relay MCP
+# Vision Relay MCP 🖼️
 
-Vision Relay MCP is a small local MCP server for Claude Code and other MCP clients. It lets a text-first coding model call a separate vision-capable model through a relay API to analyze local images.
+> A tiny MCP server that lets text-only coding models analyze images via Anthropic/OpenAI-compatible vision relay APIs.
+>
+> 一个轻量级 MCP 服务器，让不支持图片的编程模型也能借助视觉中继 API 分析截图、对比界面、解读报错。
 
-中文小白版教程见 [README.zh-CN.md](README.zh-CN.md).
+---
 
-This is useful when your main Claude Code model does not support images, or when you want to use a cheaper/default coding model and route only image tasks to a vision model.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node.js 20+](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](package.json)
+[![MCP](https://img.shields.io/badge/MCP-Compatible-blue)]()
 
-## Features
+---
 
-- Analyze a local image with a vision model.
-- Compare two local images.
-- Supports Anthropic-compatible `/v1/messages` APIs.
-- Supports OpenAI-compatible `/v1/chat/completions` APIs.
-- Keeps API keys out of project files by reading environment variables.
+## English
 
-## Project Files
+### What It Does
 
-```text
-index.js            MCP server implementation
-package.json        Node package metadata and dependencies
-package-lock.json   Locked dependency versions
-.env.example        Example environment variables
-.gitignore          Files to exclude from Git
-README.md           Usage documentation
-LICENSE             MIT license
+Vision Relay MCP solves a common pain point:
+
+```
+Your main coding model (DeepSeek, etc.)     Vision-capable model (Claude / GPT)
+         │                                              │
+         │  "What's in screenshot.png?"                 │
+         │         ─────────────►                        │
+         │              vision-relay MCP                 │
+         │         ◄─────────────                        │
+         │     "The screenshot shows a                    │
+         │      NullPointerException at line 42..."       │
 ```
 
-## Requirements
+You use a cheap or text-only model for coding. When you need image analysis, this MCP forwards the image to a vision-capable model through your relay API and returns the result transparently.
 
-- Node.js 20 or newer. Node.js 22+ is recommended.
-- Claude Code or another MCP-compatible client.
-- A relay API key for a vision-capable model.
+### Features
 
-## Install
+- 🔌 **Dual protocol support** — Anthropic-compatible (`/v1/messages`) and OpenAI-compatible (`/v1/chat/completions`)
+- 🖼️ **Two practical tools** — `analyze_image` for single images, `compare_images` for side-by-side comparison
+- 🔒 **API keys stay safe** — All credentials read from environment variables, never in source code
+- 🪶 **Minimal footprint** — Single 267-line file, zero dependencies beyond MCP SDK, extremely auditable
+- 🎯 **Explicit trigger** — Only invoked when you explicitly say "use vision-relay", no accidental calls
 
-Clone or copy this project, then install dependencies:
+### Requirements
+
+- Node.js 20 or newer (Node.js 22+ recommended)
+- Claude Code or another MCP-compatible client
+- A relay API key for a vision-capable model
+
+### Quick Start
 
 ```powershell
+# 1. Clone and install
+git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
+cd vision-relay-mcp
 npm install
+
+# 2. Configure environment variables (Anthropic-style relay)
+[Environment]::SetEnvironmentVariable("VISION_PROVIDER", "anthropic", "User")
+[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://your-relay.example.com", "User")
+[Environment]::SetEnvironmentVariable("VISION_MODEL", "claude-sonnet-4-6", "User")
+[Environment]::SetEnvironmentVariable("VISION_API_KEY", "your_api_key_here", "User")
+
+# 3. Register with Claude Code
+claude mcp add -s user vision-relay -- node "%CD%\index.js"
+
+# 4. Verify
+claude mcp list
+# You should see: vision-relay ... Connected
 ```
 
-## Configure Environment Variables
+### Usage
 
-Set the environment variables for your relay provider.
+Put an image in your project directory, then ask Claude Code:
 
-### Anthropic-Compatible Relay
+```
+Please call vision-relay to analyze screenshot.png.
+```
 
-Use this for Claude-style relays that expose `/v1/messages`.
+Or compare two images:
+
+```
+Please use vision-relay to compare before.png and after.png.
+```
+
+### Supported Vision Models
+
+Any vision-capable model works. Common choices:
+
+| Format | Models |
+|--------|--------|
+| Anthropic | `claude-sonnet-4-6`, `claude-opus-4-6` |
+| OpenAI | `gpt-4o`, `gemini-2.5-pro`, `glm-4v`, `glm-4.5v` |
+
+Check your relay provider's documentation for the exact supported model list.
+
+### Provider Configuration
+
+#### Anthropic-Compatible Relay
+
+For Claude-style relays that expose `/v1/messages`:
 
 ```powershell
 [Environment]::SetEnvironmentVariable("VISION_PROVIDER", "anthropic", "User")
@@ -55,9 +105,9 @@ Use this for Claude-style relays that expose `/v1/messages`.
 [Environment]::SetEnvironmentVariable("VISION_API_KEY", "your_api_key_here", "User")
 ```
 
-### OpenAI-Compatible Relay
+#### OpenAI-Compatible Relay
 
-Use this for relays that expose `/v1/chat/completions` and accept image input in OpenAI's `image_url` format.
+For relays that expose `/v1/chat/completions`:
 
 ```powershell
 [Environment]::SetEnvironmentVariable("VISION_PROVIDER", "openai", "User")
@@ -66,61 +116,19 @@ Use this for relays that expose `/v1/chat/completions` and accept image input in
 [Environment]::SetEnvironmentVariable("VISION_API_KEY", "your_api_key_here", "User")
 ```
 
-Restart Claude Code after changing user environment variables.
+Restart Claude Code after changing environment variables.
 
-## Add To Claude Code
-
-From this project directory, register the MCP server:
+#### Optional: VISION_MAX_TOKENS
 
 ```powershell
-claude mcp add -s user vision-relay -- node "%CD%\\index.js"
+[Environment]::SetEnvironmentVariable("VISION_MAX_TOKENS", "4000", "User")
 ```
 
-If you prefer to store non-secret settings directly in Claude Code's MCP config:
+Defaults to `2000` if not set.
 
-```powershell
-claude mcp add -s user vision-relay `
-  -e VISION_PROVIDER=anthropic `
-  -e VISION_BASE_URL=https://your-relay.example.com `
-  -e VISION_MODEL=claude-sonnet-4-6 `
-  -- node "%CD%\\index.js"
-```
+### Switching Models
 
-Do not put `VISION_API_KEY` in source control.
-
-## Verify
-
-Check that Claude Code can start the MCP server:
-
-```powershell
-claude mcp list
-claude mcp get vision-relay
-```
-
-You should see `vision-relay` with `Connected` status.
-
-## Usage
-
-Put an image in your project directory, then ask Claude Code:
-
-```text
-Please call vision-relay to analyze screenshot.png.
-```
-
-Or:
-
-```text
-Please use vision-relay to compare before.png and after.png.
-```
-
-Available tools:
-
-- `analyze_image`
-- `compare_images`
-
-## Switching Models
-
-Change the model through the environment variable:
+Change the model via environment variable:
 
 ```powershell
 [Environment]::SetEnvironmentVariable("VISION_MODEL", "claude-opus-4-6", "User")
@@ -128,38 +136,270 @@ Change the model through the environment variable:
 
 Then restart Claude Code.
 
-If you put `VISION_MODEL` in Claude Code's MCP config with `claude mcp add -e`, that value overrides the user environment variable. In that case, remove and re-add the MCP server:
+### Troubleshooting
+
+| Symptom | Likely Cause |
+|---------|-------------|
+| `Missing environment variable(s): VISION_API_KEY` | Environment variables not set. Restart Claude Code after setting them. |
+| `Vision relay failed (403)` | Relay restricts the endpoint. Try switching `VISION_PROVIDER`, or check your relay docs. |
+| `Could not process image` | Image too large (>20MB), corrupt, or unsupported format. Use PNG/JPEG under 20MB. |
+| Text works but images fail | Model doesn't support vision. Confirm with your relay provider. |
+| `Connected` but analysis fails | MCP connection ≠ API works. Double-check API key, base URL, and model name. |
+
+### Security Notes
+
+- ⚠️ **Never commit real API keys** to source control
+- ⚠️ Images are sent to your configured relay API — treat screenshots as sensitive data
+- ⚠️ Rotate any API key that has been shared in chat, logs, screenshots, or public repos
+- ⚠️ Prefer environment variables or a secret manager for credentials
+
+### Architecture
+
+```
+Claude Code (MCP Client)
+        │ stdio
+        ▼
+  index.js (MCP Server)
+        │ HTTP POST (Bearer Token)
+        ▼
+  Your Relay API
+  /v1/messages or /v1/chat/completions
+        │
+        ▼
+  Vision model returns analysis
+```
+
+### Uninstall
 
 ```powershell
 claude mcp remove vision-relay -s user
-claude mcp add -s user vision-relay `
-  -e VISION_PROVIDER=anthropic `
-  -e VISION_BASE_URL=https://your-relay.example.com `
-  -e VISION_MODEL=claude-opus-4-6 `
-  -- node "%CD%\\index.js"
 ```
 
-## Security Notes
+To also remove environment variables:
 
-- Never commit real API keys.
-- Treat screenshots as sensitive data. Images are sent to the configured relay API.
-- Prefer environment variables or a secret manager for credentials.
-- Rotate any API key that has been shared in chat, logs, screenshots, or public repos.
+```powershell
+[Environment]::SetEnvironmentVariable("VISION_PROVIDER", $null, "User")
+[Environment]::SetEnvironmentVariable("VISION_BASE_URL", $null, "User")
+[Environment]::SetEnvironmentVariable("VISION_MODEL", $null, "User")
+[Environment]::SetEnvironmentVariable("VISION_API_KEY", $null, "User")
+```
 
-## Troubleshooting
+### License
 
-### `Missing environment variable(s): VISION_API_KEY`
+MIT — see [LICENSE](LICENSE).
 
-Set `VISION_API_KEY` and restart Claude Code.
+---
 
-### `Vision relay failed (403)`
+## 简体中文
 
-The relay may restrict the endpoint or client type. Try `VISION_PROVIDER=anthropic` for Claude-style `/v1/messages` relays, or check your relay documentation.
+### 它能做什么
 
-### `Could not process image`
+Vision Relay MCP 解决了一个普遍痛点：
 
-The relay may reject very small, corrupt, unsupported, or too-large images. Try a normal PNG/JPEG screenshot under 20 MB.
+```
+你用 DeepSeek 之类的模型写代码      有视觉能力的模型（Claude / GPT）
+         │                                      │
+         │  "screenshot.png 里有什么？"           │
+         │         ─────────────►                │
+         │              vision-relay MCP         │
+         │         ◄─────────────                │
+         │     "截图显示第 42 行有                  │
+         │      NullPointerException..."          │
+```
 
-### Text works but images fail
+主力编程模型不支持图片？这个 MCP 把图片转发给视觉模型分析，结果透明返回给 Claude Code。
 
-The model or relay may not support vision input, even if the model name looks correct. Confirm with your relay provider that the selected model accepts images.
+### 特性
+
+- 🔌 **双协议支持** — 兼容 Anthropic 格式 (`/v1/messages`) 和 OpenAI 格式 (`/v1/chat/completions`)
+- 🖼️ **两个实用工具** — `analyze_image` 分析单张图片，`compare_images` 对比两张图片
+- 🔒 **密钥不进代码** — 全部走环境变量，仓库里不存任何密钥
+- 🪶 **极致简洁** — 单文件 267 行，仅依赖 MCP SDK，极端可审计
+- 🎯 **精准触发** — 只有你明确说"调用 vision-relay"时才会触发，不会误调用
+
+### 你需要准备什么
+
+```text
+1. Node.js（20 以上，推荐 22+）
+2. Claude Code 或其他 MCP 客户端
+3. 一个支持图片输入的中转站 API
+4. 一个支持视觉的模型名
+```
+
+> ⚠️ 注意：普通文本模型不行。模型必须真的支持图片输入。
+
+### 快速开始
+
+```powershell
+# 1. 克隆并安装
+git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
+cd vision-relay-mcp
+npm install
+
+# 2. 配置环境变量（Anthropic 格式中转站）
+[Environment]::SetEnvironmentVariable("VISION_PROVIDER", "anthropic", "User")
+[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://你的中转站地址", "User")
+[Environment]::SetEnvironmentVariable("VISION_MODEL", "你的视觉模型名", "User")
+[Environment]::SetEnvironmentVariable("VISION_API_KEY", "你的API密钥", "User")
+
+# 3. 注册到 Claude Code
+claude mcp add -s user vision-relay -- node "%CD%\index.js"
+
+# 4. 验证
+claude mcp list
+# 看到 vision-relay ... Connected 就说明成功了
+```
+
+### 使用方式
+
+把图片放到项目目录里，然后在 Claude Code 中说：
+
+```
+请调用 vision-relay 分析 screenshot.png
+```
+
+或者：
+
+```
+请用 vision-relay 看一下 error.png，告诉我报错的原因
+```
+
+对比两张图片：
+
+```
+请调用 vision-relay 对比 before.png 和 after.png
+```
+
+### 支持的视觉模型
+
+任何支持图片输入的模型都可以。常见选择：
+
+| 格式 | 适用模型 |
+|------|----------|
+| Anthropic | `claude-sonnet-4-6`、`claude-opus-4-6` |
+| OpenAI | `gpt-4o`、`gemini-2.5-pro`、`glm-4v`、`glm-4.5v` |
+
+具体以你的中转站后台支持列表为准。
+
+### 中转站配置
+
+#### Anthropic 格式中转站
+
+适用于 Claude Code 用的 `/v1/messages` 接口：
+
+```powershell
+[Environment]::SetEnvironmentVariable("VISION_PROVIDER", "anthropic", "User")
+[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://你的中转站地址", "User")
+[Environment]::SetEnvironmentVariable("VISION_MODEL", "你的视觉模型名", "User")
+[Environment]::SetEnvironmentVariable("VISION_API_KEY", "你的API密钥", "User")
+```
+
+#### OpenAI 格式中转站
+
+适用于 `/v1/chat/completions` 接口（OpenAI 兼容）：
+
+```powershell
+[Environment]::SetEnvironmentVariable("VISION_PROVIDER", "openai", "User")
+[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://你的中转站地址/v1", "User")
+[Environment]::SetEnvironmentVariable("VISION_MODEL", "你的视觉模型名", "User")
+[Environment]::SetEnvironmentVariable("VISION_API_KEY", "你的API密钥", "User")
+```
+
+设置完成后重启 Claude Code。
+
+#### 可选：VISION_MAX_TOKENS
+
+```powershell
+[Environment]::SetEnvironmentVariable("VISION_MAX_TOKENS", "4000", "User")
+```
+
+不设置则默认为 `2000`。
+
+### 换模型
+
+想把 Sonnet 换成 Opus：
+
+```powershell
+[Environment]::SetEnvironmentVariable("VISION_MODEL", "claude-opus-4-6", "User")
+```
+
+重启 Claude Code 即可。
+
+### 换中转站
+
+改地址：
+
+```powershell
+[Environment]::SetEnvironmentVariable("VISION_BASE_URL", "https://新的中转站地址", "User")
+```
+
+改密钥：
+
+```powershell
+[Environment]::SetEnvironmentVariable("VISION_API_KEY", "新的密钥", "User")
+```
+
+重启 Claude Code 即可。
+
+### 常见问题
+
+| 现象 | 可能原因 |
+|------|----------|
+| `Missing environment variable(s): VISION_API_KEY` | 环境变量没设。设完记得重启 Claude Code。 |
+| `Vision relay failed (403)` | 中转站限制端点或客户端类型。试试切换 `VISION_PROVIDER`。 |
+| `Could not process image` | 图片太大（>20MB）、损坏或格式不支持。用 PNG/JPEG 且小于 20MB。 |
+| 文字能返回但图片分析失败 | 模型不支持视觉。跟中转站确认该模型是否支持图片输入。 |
+| MCP 显示 Connected 但识图失败 | Connected 只代表 Claude Code 能启动 MCP。真正识图还需要 API key 正确、模型支持图片、账号有额度。 |
+
+### 安全提醒
+
+- ⚠️ **绝对不要**把 API key 写进 `index.js`、`README.md`、`.env.example` 或提交到 GitHub
+- ⚠️ 图片会发送到你配置的中转站，注意截图中的敏感信息
+- ⚠️ 密钥一旦泄露（聊天记录、截图、公开仓库），请立即轮换
+- ⚠️ 推荐放在 Windows 环境变量中
+
+### 架构
+
+```
+Claude Code（MCP 客户端）
+        │ stdio
+        ▼
+  index.js（MCP 服务器）
+        │ HTTP POST（Bearer Token）
+        ▼
+  你的中继 API
+  /v1/messages 或 /v1/chat/completions
+        │
+        ▼
+  视觉模型返回分析结果
+```
+
+### 一句话理解
+
+```text
+Claude Code 负责写代码
+vision-relay 负责接收图片
+视觉模型负责看图
+中转站负责转发 API 请求
+```
+
+你在 Claude Code 里明确说"调用 vision-relay 分析图片"，成功率最高。
+
+### 卸载
+
+```powershell
+claude mcp remove vision-relay -s user
+```
+
+如果要同时删除环境变量：
+
+```powershell
+[Environment]::SetEnvironmentVariable("VISION_PROVIDER", $null, "User")
+[Environment]::SetEnvironmentVariable("VISION_BASE_URL", $null, "User")
+[Environment]::SetEnvironmentVariable("VISION_MODEL", $null, "User")
+[Environment]::SetEnvironmentVariable("VISION_API_KEY", $null, "User")
+```
+
+### 许可证
+
+MIT — 详见 [LICENSE](LICENSE)。
