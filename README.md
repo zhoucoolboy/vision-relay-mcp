@@ -37,7 +37,7 @@ You use a cheap or text-only model for coding. When you need image analysis, thi
 - 🖼️ **Two practical tools** — `analyze_image` for single images, `compare_images` for side-by-side comparison
 - 🔒 **API keys stay safe** — All credentials read from environment variables, never in source code
 - 🪶 **Minimal footprint** — Single 267-line file, zero dependencies beyond MCP SDK, extremely auditable
-- 🎯 **Explicit trigger** — Only invoked when you explicitly say "use vision-relay", no accidental calls
+- 🎯 **Smart invocation** — Claude Code can auto-invoke it when images are present; you can also explicitly say "use vision-relay" for manual control
 
 ### Requirements
 
@@ -113,17 +113,19 @@ You should see `vision-relay` with `Connected` status.
 
 ### Usage
 
-Put an image in your project directory, then ask Claude Code:
+Put an image in your project directory and just ask Claude Code about it — the MCP may be auto-invoked:
+
+```
+What's in screenshot.png?
+What does this error say? (with error.png in the project folder)
+```
+
+You can also explicitly call it:
 
 ```
 Please call vision-relay to analyze screenshot.png.
-```
-
-Or compare two images:
-
-```
 Please use vision-relay to compare before.png and after.png.
-```
+
 
 ### Supported Vision Models
 
@@ -247,7 +249,7 @@ Vision Relay MCP 解决了一个普遍痛点：
 - 🖼️ **两个实用工具** — `analyze_image` 分析单张图片，`compare_images` 对比两张图片
 - 🔒 **密钥不进代码** — 全部走环境变量，仓库里不存任何密钥
 - 🪶 **极致简洁** — 单文件 267 行，仅依赖 MCP SDK，极端可审计
-- 🎯 **精准触发** — 只有你明确说"调用 vision-relay"时才会触发，不会误调用
+- 🎯 **智能调用** — Claude Code 遇到图片时可自动调用，你也可以手动说"调用 vision-relay"来精准控制
 
 ### 你需要准备什么
 
@@ -328,21 +330,18 @@ claude mcp get vision-relay
 
 ### 使用方式
 
-把图片放到项目目录里，然后在 Claude Code 中说：
+把图片放到项目目录里，直接用自然语言问 Claude Code 就行——MCP 可能会自动被调用：
+
+```
+screenshot.png 里有什么？
+这个报错是什么意思？（项目里有 error.png）
+```
+
+你也可以显式调用：
 
 ```
 请调用 vision-relay 分析 screenshot.png
-```
-
-或者：
-
-```
 请用 vision-relay 看一下 error.png，告诉我报错的原因
-```
-
-对比两张图片：
-
-```
 请调用 vision-relay 对比 before.png 和 after.png
 ```
 
@@ -437,7 +436,7 @@ vision-relay 负责接收图片
 中转站负责转发 API 请求
 ```
 
-你在 Claude Code 里明确说"调用 vision-relay 分析图片"，成功率最高。
+大多数情况下，直接把图片放项目里问 Claude Code 就行，它会自动调用 vision-relay。欢迎验证！
 
 ### 卸载
 
