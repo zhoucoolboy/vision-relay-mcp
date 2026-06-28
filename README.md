@@ -407,7 +407,7 @@ claude mcp add -s user vision-relay `
 
 ### 安全提醒
 
-- ⚠️ **绝对不要**把 API key 写进 `index.js`、`README.md`、`.env.example` 或提交到 GitHub
+- ⚠️ **绝对不要**把 API key 写进 `index.js` / `README.md` / `.env.example` 或提交到 GitHub
 - ⚠️ 图片会发送到你配置的中转站，注意截图中的敏感信息
 - ⚠️ 密钥一旦泄露（聊天记录、截图、公开仓库），请立即轮换
 - ⚠️ 推荐放在 Windows 环境变量中
