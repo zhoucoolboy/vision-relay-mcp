@@ -1,0 +1,25 @@
+{
+  "name": "vision-relay-mcp",
+  "version": "0.1.0",
+  "description": "A local MCP server that routes image analysis to Anthropic-compatible or OpenAI-compatible vision relay APIs.",
+  "type": "module",
+  "bin": {
+    "vision-relay-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "mcp",
+    "claude-code",
+    "vision",
+    "image-analysis",
+    "anthropic",
+    "openai"
+  ],
+  "author": "Vision Relay MCP contributors",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.15.1"
+  }
+}
