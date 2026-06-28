@@ -131,8 +131,8 @@ This project does **not** limit which model you can use. **Any vision-capable mo
 
 The model is entirely determined by what you set in `VISION_MODEL`. For example:
 
-- **Anthropic format** — `claude-sonnet-4-6`, `claude-opus-4-6`, or any other Claude model that accepts images
-- **OpenAI format** — `gpt-4o`, `gpt-4o-mini`, `gemini-2.5-pro`, `glm-4v`, `glm-4.5v`, or any other vision model your relay provides
+- **Anthropic format** — `claude-sonnet-4-6` / `claude-opus-4-6` / any other Claude model that accepts images
+- **OpenAI format** — `gpt-4o` / `gpt-4o-mini` / `gemini-2.5-pro` / `glm-4v` / `glm-4.5v` / any other vision model your relay provides
 
 Just set `VISION_MODEL` to whatever your relay supports — check your relay provider's model list for details.
 
@@ -352,8 +352,8 @@ claude mcp get vision-relay
 
 模型完全由你设置的 `VISION_MODEL` 决定。举个例子：
 
-- **Anthropic 格式** — `claude-sonnet-4-6`、`claude-opus-4-6`，或者任何支持图片的 Claude 模型
-- **OpenAI 格式** — `gpt-4o`、`gpt-4o-mini`、`gemini-2.5-pro`、`glm-4v`、`glm-4.5v`，或者你的中转站提供的任何其他视觉模型
+- **Anthropic 格式** — `claude-sonnet-4-6` / `claude-opus-4-6` / 任何支持图片的 Claude 模型
+- **OpenAI 格式** — `gpt-4o` / `gpt-4o-mini` / `gemini-2.5-pro` / `glm-4v` / `glm-4.5v` / 你的中转站提供的任何其他视觉模型
 
 把你中转站支持的视觉模型名填到 `VISION_MODEL` 就行，具体去你的中转站后台看支持列表。
 
