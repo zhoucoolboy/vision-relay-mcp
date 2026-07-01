@@ -574,7 +574,7 @@ macOS / Linux:
 claude mcp list
 ```
 
-确认显示 `vision-relay ... Connected`。如果显示 `Disconnected` 或服务不存在，请查看[常见问题](#常见问题)。
+确认显示 `vision-relay ... Connected` 即表示连接成功。如果显示 `Disconnected` 或服务不存在，请查看[常见问题](#常见问题)
 
 ### 工具说明
 
@@ -632,10 +632,10 @@ claude mcp list
 
 ### 从 v1.0.0 升级
 
-1. 下载或克隆 v1.1.0 到新目录（或替换旧目录）。
-2. 执行 `npm install`。
-3. 将 MCP 配置中的 `args` 路径改为 v1.1.0 的 `index.js`。
-4. 保留原有环境变量，或按需更新。
+1. 下载或克隆 v1.1.0 到新目录（或替换旧目录）
+2. 执行 `npm install`
+3. 将 MCP 配置中的 `args` 路径改为 v1.1.0 的 `index.js`
+4. 保留原有环境变量，或按需更新
 5. 替换旧工具调用：
 
 | v1.0.0 调用方式 | v1.1.0 等价方式 |
@@ -643,16 +643,16 @@ claude mcp list
 | `analyze_image` + `image_path` | `process_images` + `image_paths: ["..."]` |
 | `compare_images` + 两张路径 | `process_images` + 两张路径 + 对比提示词 |
 
-6. 重启 Claude Code。
-7. 执行 `claude mcp list`，确认 `vision-relay` 为 `Connected`。
+6. 重启 Claude Code
+7. 执行 `claude mcp list`，确认 `vision-relay` 为 `Connected`
 
 ### 安全说明
 
-- **不要提交真实 API key。** `.env.example` 只是模板，不是配置文件。
-- **不要把密钥写进** `index.js`、README 或任何提交到版本控制的文件。
-- **推荐放在 MCP 配置的 `env` 块**，或系统环境变量、密钥管理工具中。
-- 如果密钥曾出现在聊天、日志、截图或公开仓库中，**应立即轮换**。
-- 服务器仅向 `VISION_BASE_URL` 发起 HTTPS 请求，不会回传数据、收集遥测或与第三方通信。
+- **不要提交真实 API key** — `.env.example` 只是模板，不是配置文件
+- **不要把密钥写进** `index.js`、README 或任何提交到版本控制的文件
+- **推荐放在 MCP 配置的 `env` 块**，或系统环境变量、密钥管理工具中
+- 如果密钥曾出现在聊天、日志、截图或公开仓库中，**应立即轮换**
+- 服务器仅向 `VISION_BASE_URL` 发起 HTTPS 请求，不会回传数据、收集遥测或与第三方通信
 
 ### 常见问题
 
