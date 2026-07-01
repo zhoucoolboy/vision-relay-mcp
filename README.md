@@ -409,6 +409,22 @@ Vision Relay MCP 就是这个桥梁：
 
 你只需配置好视觉接口，Claude Code 调用 `process_images` 一个工具即可，剩下的（读取文件、编码、调用 API、返回结果）由服务自动完成。
 
+### 快速开始
+
+```bash
+# 1. 克隆项目
+git clone https://github.com/your-org/vision-relay-mcp.git
+cd vision-relay-mcp
+
+# 2. 安装唯一的依赖
+npm install
+
+# 3. 验证语法
+npm run check
+```
+
+然后将服务添加到 Claude Code MCP 配置（见下方 [Claude Code 配置](#claude-code-配置-1)），重启 Claude Code 即可使用。
+
 ### 工作原理
 
 1. **Claude Code** 调用 `process_images` 工具，传入本地图片路径和任务描述。
@@ -481,11 +497,20 @@ npm run check
 | Provider | 设置 `VISION_BASE_URL` 为 | 实际请求地址 |
 | --- | --- | --- |
 | `anthropic` | `https://api.example.com` | `https://api.example.com/v1/messages` |
+| `anthropic` | `https://api.example.com/v1` | `https://api.example.com/v1/messages` |
 | `openai` | `https://api.example.com` | `https://api.example.com/v1/chat/completions` |
+| `openai` | `https://api.example.com/v1` | `https://api.example.com/v1/chat/completions` |
 
 如果设置了完整路径（如末尾已包含 `/v1/messages`），服务会直接使用，不再追加。
 
-**API key 回退顺序：** `VISION_API_KEY` → `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`。
+**API key 回退：**
+
+如果未设置 `VISION_API_KEY`，服务会依次尝试：
+
+1. `ANTHROPIC_API_KEY`（当 `VISION_PROVIDER` 为 `anthropic` 时）
+2. `OPENAI_API_KEY`（当 `VISION_PROVIDER` 为 `openai` 时）
+
+`VISION_API_KEY` 始终优先。
 
 ### Claude Code 配置
 
@@ -531,15 +556,31 @@ npm run check
 
 **平台路径示例：**
 
-Windows: `"args": ["C:\\Users\\you\\vision-relay-mcp\\index.js"]`
+Windows:
+```json
+"args": ["C:\\Users\\you\\vision-relay-mcp\\index.js"]
+```
 
-macOS / Linux: `"args": ["/Users/you/vision-relay-mcp/index.js"]`
+macOS / Linux:
+```json
+"args": ["/Users/you/vision-relay-mcp/index.js"]
+```
 
-配置完成后重启 Claude Code，执行 `claude mcp list` 确认 `vision-relay ... Connected`。
+**验证连接：**
+
+配置完成后重启 Claude Code，执行：
+
+```bash
+claude mcp list
+```
+
+确认显示 `vision-relay ... Connected`。如果显示 `Disconnected` 或服务不存在，请查看[常见问题](#常见问题)。
 
 ### 工具说明
 
 #### `process_images`
+
+**描述：** 通用视觉工具，一次可处理一张或多张本地图片。用于 OCR、提取结构化信息、描述内容、回答问题、定位元素、总结截图，或多图推理。
 
 **输入格式：**
 
