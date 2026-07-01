@@ -404,13 +404,18 @@ compare_images（双图对比）。
 ### 快速开始
 
 ```bash
+# 1. 克隆项目
 git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
 cd vision-relay-mcp
+
+# 2. 安装依赖（仅一个包）
 npm install
+
+# 3. 验证语法（不会启动服务）
 npm run check
 ```
 
-然后配置 Claude Code MCP，重启，执行 claude mcp list 验证。
+然后将服务添加到 Claude Code MCP 配置（见下方 [Claude Code 配置](#claude-code-配置)），重启 Claude Code，执行 claude mcp list 确认显示 Connected 即完成。
 
 ### 运行要求
 
@@ -421,31 +426,36 @@ npm run check
 
 ### 配置项
 
-所有配置通过环境变量传入。
+所有配置通过环境变量传入，无需配置文件。必填三项：
+
+| 名称 | 必填 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| VISION_API_KEY | 是 | — | 接口 API key |
+| VISION_BASE_URL | 是 | — | 接口地址，填基础地址即可，服务器会自动补全 API 路径 |
+| VISION_MODEL | 是 | — | 视觉模型名，必须支持图片输入 |
+
+选填（不改也能正常用）：
 
 | 名称 | 必填 | 默认 | 说明 |
 | --- | --- | --- | --- |
 | VISION_PROVIDER | 否 | anthropic | anthropic 或 openai |
-| VISION_API_KEY | 是 | — | API key |
-| VISION_BASE_URL | 是 | — | 接口地址（自动补全路径） |
-| VISION_MODEL | 是 | — | 视觉模型名 |
-| VISION_MAX_TOKENS | 否 | 2000 | 最大返回 token |
-| VISION_MAX_IMAGE_SIZE | 否 | 0 | 单图大小上限（字节），0=不限制 |
+| VISION_MAX_TOKENS | 否 | 2000 | 最大返回 token 数 |
+| VISION_MAX_IMAGE_SIZE | 否 | 0 | 单图大小上限（字节），0 = 不限制 |
 
 **URL 自动补全：**
 
-| Provider | 设置为 | 实际请求 |
+| Provider | 设置为 | 实际请求地址 |
 | --- | --- | --- |
-| anthropic | `https://api.example.com` | `https://api.example.com/v1/messages` |
-| openai | `https://api.example.com` | `https://api.example.com/v1/chat/completions` |
+| anthropic | https://api.example.com | https://api.example.com/v1/messages |
+| openai | https://api.example.com | https://api.example.com/v1/chat/completions |
 
-若已设置完整路径则直接使用。
-
-**API key 回退：** VISION_API_KEY → ANTHROPIC_API_KEY / OPENAI_API_KEY。
+如果设置了完整路径则直接使用，不再追加。API key 回退顺序：VISION_API_KEY → ANTHROPIC_API_KEY / OPENAI_API_KEY。
 
 ### Claude Code 配置
 
-- 用户级配置：~/.claude/claude_desktop_config.json
+打开 Claude Code 的 MCP 配置文件，在 mcpServers 中添加以下内容：
+
+- 用户级配置（推荐）：~/.claude/claude_desktop_config.json
 - 项目级配置：.claude/settings.json
 
 ```json
@@ -466,8 +476,10 @@ npm run check
 }
 ```
 
-路径必须用绝对路径。Windows：C:\Users\...，macOS/Linux：/Users/...。
-配置后重启 Claude Code，执行 claude mcp list 验证。
+要点：
+- args 必须用绝对路径。Windows：C:\Users\你\vision-relay-mcp\index.js，macOS/Linux：/Users/你/vision-relay-mcp/index.js
+- env 里的四个值换成你的真实信息。如果用 OpenAI 兼容接口，VISION_PROVIDER 改为 openai
+- 保存后重启 Claude Code，执行 claude mcp list 验证
 
 ### 工具说明
 
@@ -498,16 +510,17 @@ png、jpg/jpeg、webp、gif、bmp
 
 ### 从 v0.1.0 升级
 
-1. 下载 v1.1.0，执行 npm install
-2. 更新 MCP 路径指向 v1.1.0 的 index.js
-3. 替换调用方式：
+1. **下载 v1.1.0** 到新目录（保留旧版本作为备份），执行 npm install。
+2. **更新 MCP 配置** — 把 args 路径改为 v1.1.0 的 index.js，环境变量保持不变。
+3. **替换调用方式** — 参数从 image_path（单数字符串）变为 image_paths（复数数组）：
 
-| v0.1.0 | v1.1.0 |
+| v0.1.0 调用 | v1.1.0 等价 |
 | --- | --- |
-| analyze_image + image_path | process_images + image_paths: ["..."] |
-| compare_images + 两张路径 | process_images + 两张路径 + 对比提示词 |
+| analyze_image(image_path="路径") | process_images(image_paths=["路径"]) |
+| compare_images(两张路径) | process_images(两张路径) + 对比提示词 |
 
-4. 重启 Claude Code，验证连接。
+4. **重启 Claude Code**，执行 claude mcp list 确认 Connected。
+5. 确认正常后删除旧版本。
 
 ### 安全说明
 
