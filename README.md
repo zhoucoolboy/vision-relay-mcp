@@ -350,16 +350,16 @@ identify objects / colors / layout, and note cross-image relationships.
 
 ## Security
 
-- **Never commit real API keys.** The `.env.example` file is a template, not a
-  configuration file.
-- **Do not hardcode secrets** in `index.js`, README, or any committed file.
-- **Use environment variables** or a secrets manager. The MCP `env` block in
-  your Claude Code config is the recommended place.
+- **Never commit real API keys** — the `.env.example` file is a template, not a
+  configuration file
+- **Do not hardcode secrets** in `index.js`, README, or any committed file
+- **Use environment variables** or a secrets manager — the MCP `env` block in
+  your Claude Code config is the recommended place
 - **Rotate immediately** if a key appears in chat logs, screenshots, git
-  history, or a public repository.
+  history, or a public repository
 - The server makes outbound HTTPS requests only to the `VISION_BASE_URL` you
-  configure. It does not phone home, collect telemetry, or communicate with
-  any third party.
+  configure — it does not phone home, collect telemetry, or communicate with
+  any third party
 
 ## Troubleshooting
 
@@ -423,7 +423,7 @@ npm install
 npm run check
 ```
 
-然后将服务添加到 Claude Code MCP 配置（见下方 [Claude Code 配置](#claude-code-配置-1)），重启 Claude Code 即可使用。
+然后将服务添加到 Claude Code MCP 配置（见下方 [Claude Code 配置](#claude-code-配置)），重启 Claude Code 即可使用。
 
 ### 工作原理
 
@@ -556,12 +556,12 @@ npm run check
 
 **平台路径示例：**
 
-Windows:
+**Windows：**
 ```json
 "args": ["C:\\Users\\you\\vision-relay-mcp\\index.js"]
 ```
 
-macOS / Linux:
+**macOS / Linux：**
 ```json
 "args": ["/Users/you/vision-relay-mcp/index.js"]
 ```

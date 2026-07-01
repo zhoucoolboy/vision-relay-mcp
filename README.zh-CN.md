@@ -242,12 +242,12 @@ process_images    → 统一入口，单图多图都走这
 
 ### 升级步骤
 
-1. 下载或克隆 v1.1.0 项目。
-2. 在项目目录执行 `npm install`。
-3. 把 MCP 配置里的 `index.js` 路径改成 v1.1.0 的。
-4. 保留原来的接口地址、模型名和 API key（或按需更新）。
-5. 重启 Claude Code。
-6. 执行 `claude mcp list`，确认 `vision-relay` 是 `Connected`。
+1. 下载或克隆 v1.1.0 项目
+2. 在项目目录执行 `npm install`
+3. 把 MCP 配置里的 `index.js` 路径改成 v1.1.0 的
+4. 保留原来的接口地址、模型名和 API key（或按需更新）
+5. 重启 Claude Code
+6. 执行 `claude mcp list`，确认 `vision-relay` 是 `Connected`
 
 ### 旧调用 → 新调用
 
