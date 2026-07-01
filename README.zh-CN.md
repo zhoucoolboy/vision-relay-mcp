@@ -83,11 +83,11 @@ npm run check
 
 不要把真实 key 写进代码、README、截图或聊天记录。
 
-## 第 3 步：配置 Claude Code
+## 第 3 步：选择配置方式
 
 推荐使用 Claude Code CLI 添加 MCP。
 
-### Anthropic 兼容接口
+### 方式 A：使用 Claude Code CLI
 
 ```bash
 claude mcp add -s user vision-relay \
@@ -98,7 +98,7 @@ claude mcp add -s user vision-relay \
   -- node /absolute/path/to/vision-relay-mcp/index.js
 ```
 
-### OpenAI 兼容接口
+如果你的接口是 OpenAI 兼容格式，把 provider 改成 `openai`：
 
 ```bash
 claude mcp add -s user vision-relay \
@@ -122,7 +122,7 @@ claude mcp add -s user vision-relay `
 
 路径必须指向你电脑上的 `index.js`。不要照抄示例路径。
 
-## 第 4 步：也可以手动编辑 `.claude.json`
+### 方式 B：手动编辑 `.claude.json`
 
 Claude Code 用户级配置文件通常在：
 
@@ -155,7 +155,11 @@ Windows JSON 路径需要写成这样：
 "args": ["C:\\path\\to\\vision-relay-mcp\\index.js"]
 ```
 
-保存配置后，重启 Claude Code。
+## 第 4 步：重启 Claude Code
+
+无论你使用方式 A 还是方式 B，配置完成后都要重启 Claude Code。
+
+MCP 服务列表只在 Claude Code 启动时加载一次，不重启可能看不到新配置。
 
 ## 第 5 步：验证连接
 

@@ -69,7 +69,7 @@ v0.1.0 exposed two task-specific tools:
 The model set in `VISION_MODEL` must support image input. A text-only model can
 connect successfully, but it will fail when an image is sent.
 
-## Install
+## Step 1: Install the Project
 
 Clone or download the project, then install dependencies:
 
@@ -85,7 +85,7 @@ starting the MCP server or making network requests.
 
 There is no build step.
 
-## Configuration
+## Step 2: Prepare Configuration Values
 
 All runtime settings are read from environment variables.
 
@@ -112,7 +112,7 @@ The server completes provider-specific paths for you.
 
 If `VISION_BASE_URL` already ends with the full request path, it is used as-is.
 
-## Claude Code Setup
+## Step 3: Add the MCP Server to Claude Code
 
 The easiest and most portable setup is the Claude Code CLI.
 
@@ -185,6 +185,8 @@ For Windows JSON, escape backslashes:
 "args": ["C:\\path\\to\\vision-relay-mcp\\index.js"]
 ```
 
+## Step 4: Restart and Verify Claude Code
+
 After changing MCP configuration, restart Claude Code.
 
 Verify the connection:
@@ -195,9 +197,9 @@ claude mcp list
 
 You should see `vision-relay ... Connected`.
 
-## Tool Reference
+## Step 5: Use `process_images`
 
-### Tool: `process_images`
+### Tool Input
 
 Input:
 
@@ -376,7 +378,7 @@ Claude Code 调用 `process_images`，服务负责读取图片、校验格式、
 
 `VISION_MODEL` 必须是支持图片输入的模型。纯文本模型不能识图。
 
-### 安装
+### 第 1 步：安装项目
 
 ```bash
 git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
@@ -387,7 +389,7 @@ npm run check
 
 `npm run check` 只检查语法，不会启动服务，也不会发起网络请求。
 
-### 配置项
+### 第 2 步：准备配置项
 
 所有配置都通过环境变量传入。
 
@@ -406,7 +408,7 @@ API key 回退顺序：
 VISION_API_KEY -> ANTHROPIC_API_KEY -> OPENAI_API_KEY
 ```
 
-### Claude Code 配置
+### 第 3 步：添加 Claude Code MCP 配置
 
 推荐使用 Claude Code CLI：
 
@@ -461,6 +463,8 @@ Windows JSON 路径需要转义反斜杠：
 "args": ["C:\\path\\to\\vision-relay-mcp\\index.js"]
 ```
 
+### 第 4 步：重启并验证 Claude Code
+
 保存后重启 Claude Code，再执行：
 
 ```bash
@@ -469,7 +473,7 @@ claude mcp list
 
 看到 `vision-relay ... Connected` 就说明 MCP 已启动。
 
-### 使用方式
+### 第 5 步：开始使用
 
 在 Claude Code 里直接说明图片路径和任务即可。
 
