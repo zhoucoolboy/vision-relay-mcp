@@ -4,166 +4,162 @@
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-A local MCP server that gives Claude Code vision capabilities — it relays
-local images to a vision-capable API and returns the text response.
+A local MCP server that gives Claude Code image understanding through a
+vision-capable API. It reads local image files, sends them to your configured
+vision endpoint, and returns the text response to Claude Code.
 
-> This document is bilingual — English first, Chinese follows.
+This document is bilingual. English is first, Chinese follows.
 
 ---
 
 ## What It Does
 
-Claude Code cannot view images on its own. Vision Relay MCP bridges local
-image files and a vision model:
+Claude Code cannot view images by itself. Vision Relay MCP bridges local image
+files and a vision model:
 
-```
-Local Image(s) → Vision Relay MCP → Vision API → Text Result → Claude Code
-```
-
-Claude Code calls one tool — `process_images` — and the server handles file
-reading, base64 encoding, API communication, and response extraction.
-
-## How It Works
-
-1. Claude Code invokes `process_images` with image paths and a prompt.
-2. The server concurrently reads and validates each image, encodes them as
-   base64, and builds a provider-specific request body.
-3. The vision model processes the images and returns a text response.
-4. Claude Code receives the text and continues the conversation.
-
-The server is a single file (index.js, ~240 lines). It does not store images,
-cache results, or communicate with any service other than the one you
-configure.
-
-## Quick Start
-
-```bash
-# 1. Clone the project
-git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
-cd vision-relay-mcp
-
-# 2. Install the single dependency
-npm install
-
-# 3. Verify the code parses correctly
-npm run check
+```text
+Local image(s) -> Vision Relay MCP -> Vision API -> Text result -> Claude Code
 ```
 
-Then add the server to your Claude Code MCP configuration (see [Claude Code
-Setup](#claude-code-setup)), restart Claude Code, and verify with
-`claude mcp list`. You should see `vision-relay ... Connected`.
+Claude Code calls one tool, `process_images`. The server handles file reading,
+validation, base64 encoding, API communication, and response extraction.
 
----
+The server is a single local Node.js file. It does not store images, cache
+results, or call any service other than the endpoint you configure.
 
 ## Version History
 
-### v1.1.0 (current)
+### v1.1.0 Current
 
-A **single-entry-point upgrade** — replaces `analyze_image` and
-`compare_images` from v0.1.0 with one `process_images` tool. Behavior is
-prompt-driven rather than hard-coded by tool name.
+v1.1.0 is a single-entry upgrade. It replaces the old `analyze_image` and
+`compare_images` tools with one prompt-driven tool: `process_images`.
 
-**Changes from v0.1.0:**
-- Single tool instead of two
-- Supports any number of images (v0.1.0: 1 or exactly 2)
-- All images sent in one API request (v0.1.0: sequential)
-- Concurrent file reading via `Promise.all()` (v0.1.0: sequential)
-- Configurable per-image size limit (VISION_MAX_IMAGE_SIZE)
-- OpenAI-compatible endpoint support (v0.1.0: Anthropic only)
+Changes from v0.1.0:
 
-### v0.1.0 (first version)
+- One tool instead of two
+- Supports one or more images in the same schema
+- Sends all images in one model request
+- Reads local image files concurrently with `Promise.all()`
+- Adds `VISION_MAX_IMAGE_SIZE` for optional per-image limits
+- Supports Anthropic-compatible and OpenAI-compatible vision APIs
 
-Two purpose-specific tools: `analyze_image` (single image) and
-`compare_images` (exactly two images).
+### v0.1.0 First Version
+
+v0.1.0 exposed two task-specific tools:
+
+- `analyze_image` for one image
+- `compare_images` for exactly two images
 
 | Aspect | v0.1.0 | v1.1.0 |
 | --- | --- | --- |
 | Tools | 2 | 1 |
-| Images per call | 1 or exactly 2 | 1+ |
-| Request strategy | One per image | All in one |
+| Images per call | 1 or exactly 2 | 1 or more |
+| Request strategy | Task-specific | Prompt-driven |
 | File reading | Sequential | Concurrent |
-| Size limit | None | Configurable |
-| API formats | Anthropic only | Anthropic + OpenAI |
-
----
+| Size limit | None | Optional |
+| API formats | Anthropic | Anthropic and OpenAI |
 
 ## Requirements
 
-- Node.js ≥ 18.0.0
-- An MCP-compatible client (Claude Code or similar)
-- A vision-capable API endpoint (Anthropic Messages or OpenAI Chat
-  Completions format)
-- An API key
+- Node.js `18.0.0` or newer
+- Claude Code or another MCP-compatible client
+- A vision-capable API endpoint
+- An API key for that endpoint
 
-> The model in VISION_MODEL must support image input.
+The model set in `VISION_MODEL` must support image input. A text-only model can
+connect successfully, but it will fail when an image is sent.
 
 ## Install
 
-Clone the repository and install its single dependency:
+Clone or download the project, then install dependencies:
 
 ```bash
 git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
 cd vision-relay-mcp
 npm install
-```
-
-Verify the JavaScript parses without errors:
-
-```bash
 npm run check
 ```
 
-This runs `node --check index.js` — it validates syntax without starting the
-server or making any network calls. No output means success.
+`npm run check` runs `node --check index.js`. It validates syntax without
+starting the MCP server or making network requests.
 
-The only runtime dependency is
-[`@modelcontextprotocol/sdk`](https://www.npmjs.com/package/@modelcontextprotocol/sdk),
-which provides the MCP server framework. There is no build step.
-
----
+There is no build step.
 
 ## Configuration
 
-All settings via environment variables. No config file.
+All runtime settings are read from environment variables.
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| VISION_PROVIDER | No | `anthropic` | `anthropic` or `openai` |
-| VISION_API_KEY | Yes | — | API key |
-| VISION_BASE_URL | Yes | — | Base URL (auto-completes `/v1/messages` or `/v1/chat/completions`) |
-| VISION_MODEL | Yes | — | Vision-capable model name |
-| VISION_MAX_TOKENS | No | `2000` | Max response tokens |
-| VISION_MAX_IMAGE_SIZE | No | `0` (off) | Per-image byte limit |
+| `VISION_PROVIDER` | No | `anthropic` | `anthropic` or `openai` |
+| `VISION_API_KEY` | Yes | none | API key |
+| `VISION_BASE_URL` | Yes | none | Base URL for the API |
+| `VISION_MODEL` | Yes | none | Vision-capable model name |
+| `VISION_MAX_TOKENS` | No | `2000` | Max response tokens |
+| `VISION_MAX_IMAGE_SIZE` | No | `0` | Per-image byte limit |
 
-**URL auto-completion:**
+`VISION_API_KEY` takes priority. If it is not set, the server also checks
+`ANTHROPIC_API_KEY` and `OPENAI_API_KEY`.
 
-| Provider | You set | Actual request URL |
+### URL Handling
+
+The server completes provider-specific paths for you.
+
+| Provider | Base URL you set | Added path |
 | --- | --- | --- |
-| anthropic | `https://api.example.com` | `https://api.example.com/v1/messages` |
-| anthropic | `https://api.example.com/v1` | `https://api.example.com/v1/messages` |
-| openai | `https://api.example.com` | `https://api.example.com/v1/chat/completions` |
-| openai | `https://api.example.com/v1` | `https://api.example.com/v1/chat/completions` |
+| `anthropic` | host or `/v1` | `/v1/messages` |
+| `openai` | host or `/v1` | `/v1/chat/completions` |
 
-If the URL already ends with the full path, it's used as-is.
-
-**API key fallback:** VISION_API_KEY → ANTHROPIC_API_KEY or OPENAI_API_KEY.
-
----
+If `VISION_BASE_URL` already ends with the full request path, it is used as-is.
 
 ## Claude Code Setup
 
-Add the server to your Claude Code MCP configuration. The config file location
-depends on your OS and preference:
+The easiest and most portable setup is the Claude Code CLI.
 
-- **User-level** (applies to all projects, recommended for most users):
-  macOS: `~/.claude/claude_desktop_config.json`
-  Windows: `%USERPROFILE%\.claude\claude_desktop_config.json`
-- **Project-level** (only the current project): `.claude/settings.json`
+### Option A: Claude Code CLI
 
-Open the file in any text editor and add a `vision-relay` entry under
-`mcpServers`. Replace the placeholder values with your actual configuration.
+Run this from the project directory. Replace every placeholder value first.
 
-**For Anthropic-compatible endpoints** (VISION_PROVIDER = anthropic):
+```bash
+claude mcp add -s user vision-relay \
+  -e VISION_PROVIDER=anthropic \
+  -e VISION_BASE_URL=https://your-relay.example.com \
+  -e VISION_MODEL=your-vision-model \
+  -e VISION_API_KEY=your_api_key_here \
+  -- node /absolute/path/to/vision-relay-mcp/index.js
+```
+
+For an OpenAI-compatible endpoint, use:
+
+```bash
+claude mcp add -s user vision-relay \
+  -e VISION_PROVIDER=openai \
+  -e VISION_BASE_URL=https://your-openai-compatible-endpoint.example.com \
+  -e VISION_MODEL=your-vision-model \
+  -e VISION_API_KEY=your_api_key_here \
+  -- node /absolute/path/to/vision-relay-mcp/index.js
+```
+
+Windows users can use a Windows absolute path:
+
+```powershell
+claude mcp add -s user vision-relay `
+  -e VISION_PROVIDER=anthropic `
+  -e VISION_BASE_URL=https://your-relay.example.com `
+  -e VISION_MODEL=your-vision-model `
+  -e VISION_API_KEY=your_api_key_here `
+  -- node C:\path\to\vision-relay-mcp\index.js
+```
+
+### Option B: Edit `.claude.json`
+
+Claude Code also stores user-level MCP configuration in:
+
+- Windows: `%USERPROFILE%\.claude.json`
+- macOS/Linux: `~/.claude.json`
+
+Add a `vision-relay` entry under `mcpServers`. Use an absolute path for
+`index.js`.
 
 ```json
 {
@@ -175,95 +171,98 @@ Open the file in any text editor and add a `vision-relay` entry under
       "env": {
         "VISION_PROVIDER": "anthropic",
         "VISION_BASE_URL": "https://your-relay.example.com",
-        "VISION_MODEL": "your-model",
-        "VISION_API_KEY": "your_key"
+        "VISION_MODEL": "your-vision-model",
+        "VISION_API_KEY": "your_api_key_here"
       }
     }
   }
 }
 ```
 
-**For OpenAI-compatible endpoints** (VISION_PROVIDER = openai):
+For Windows JSON, escape backslashes:
 
 ```json
-{
-  "mcpServers": {
-    "vision-relay": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["/absolute/path/to/vision-relay-mcp/index.js"],
-      "env": {
-        "VISION_PROVIDER": "openai",
-        "VISION_BASE_URL": "https://your-endpoint.example.com",
-        "VISION_MODEL": "your-model",
-        "VISION_API_KEY": "your_key"
-      }
-    }
-  }
-}
+"args": ["C:\\path\\to\\vision-relay-mcp\\index.js"]
 ```
 
-**Important details:**
+After changing MCP configuration, restart Claude Code.
 
-- The `args` path must be an **absolute path** to the `index.js` file from
-  step 1. Relative paths will not work because the MCP server's working
-  directory is unpredictable.
-  - Windows example: `C:\\Users\\yourname\\vision-relay-mcp\\index.js`
-  - macOS/Linux example: `/Users/yourname/vision-relay-mcp/index.js`
-- If the config file doesn't exist yet, create it with the full JSON
-  structure shown above.
-- After saving, **restart Claude Code** — MCP servers are loaded only at
-  startup.
-- Verify the connection by running `claude mcp list`. You should see
-  `vision-relay ... Connected`. If you see `Disconnected` or the server is
-  missing, run `node /path/to/index.js` manually to see the error.
+Verify the connection:
 
----
+```bash
+claude mcp list
+```
+
+You should see `vision-relay ... Connected`.
 
 ## Tool Reference
 
-### `process_images`
+### Tool: `process_images`
 
-**Input:**
+Input:
+
 ```json
 {
-  "image_paths": ["/abs/path/to/image.png"],
+  "image_paths": ["/absolute/path/to/image.png"],
   "prompt": "Extract all visible text."
 }
 ```
 
 | Field | Required | Type | Description |
 | --- | --- | --- | --- |
-| `image_paths` | Yes | `string[]` | Absolute paths. All encoded and sent in one request. |
-| `prompt` | No | `string` | Task instruction. Omitted = comprehensive default. |
+| `image_paths` | Yes | `string[]` | Absolute image paths |
+| `prompt` | No | `string` | Task instruction |
+
+If `prompt` is omitted, the server uses a general image analysis prompt.
 
 ### Examples
 
-**OCR:**
+OCR:
+
 ```json
-{ "image_paths": ["/abs/path/screenshot.png"], "prompt": "Extract all visible text. Preserve reading order." }
+{
+  "image_paths": ["/absolute/path/to/screenshot.png"],
+  "prompt": "Extract all visible text. Preserve reading order."
+}
 ```
 
-**Comparison:**
+Comparison:
+
 ```json
-{ "image_paths": ["/abs/path/v1.png", "/abs/path/v2.png"], "prompt": "List every visual difference between these two designs." }
+{
+  "image_paths": [
+    "/absolute/path/to/before.png",
+    "/absolute/path/to/after.png"
+  ],
+  "prompt": "Compare these images and list meaningful differences."
+}
 ```
 
-**Structured extraction:**
+Structured extraction:
+
 ```json
-{ "image_paths": ["/abs/path/form.jpg"], "prompt": "Extract visible fields as a JSON object." }
+{
+  "image_paths": ["/absolute/path/to/form.jpg"],
+  "prompt": "Extract visible fields as a JSON object."
+}
 ```
 
-**Multi-image:**
-```json
-{ "image_paths": ["/abs/path/1.png", "/abs/path/2.png", "/abs/path/3.png"], "prompt": "These show sequential steps. Describe each step." }
-```
+Multi-image sequence:
 
----
+```json
+{
+  "image_paths": [
+    "/absolute/path/to/step-1.png",
+    "/absolute/path/to/step-2.png",
+    "/absolute/path/to/step-3.png"
+  ],
+  "prompt": "These are sequential steps. Describe each step."
+}
+```
 
 ## Supported Image Formats
 
-| Extension | MIME Type |
+| Extension | MIME type |
 | --- | --- |
 | `.png` | `image/png` |
 | `.jpg` / `.jpeg` | `image/jpeg` |
@@ -271,192 +270,172 @@ Open the file in any text editor and add a `vision-relay` entry under
 | `.gif` | `image/gif` |
 | `.bmp` | `image/bmp` |
 
----
+Other formats, such as SVG, PDF, or HEIC, should be converted first.
 
 ## Upgrade From v0.1.0
 
-1. **Download v1.1.0** to a new directory (keep the old one as a backup):
-   ```bash
-   git clone https://github.com/zhoucoolboy/vision-relay-mcp.git vision-relay-mcp-v1.1
-   cd vision-relay-mcp-v1.1
-   npm install
-   ```
+Download v1.1.0 to a new directory:
 
-2. **Update your MCP config** — change `args` to point to the v1.1.0
-   `index.js`. Keep your existing environment variables unchanged.
+```bash
+git clone https://github.com/zhoucoolboy/vision-relay-mcp.git vision-relay-mcp-v1.1
+cd vision-relay-mcp-v1.1
+npm install
+```
 
-3. **Replace old tool invocations.** v1.1.0 has only `process_images`, and
-   the parameter changed from `image_path` (singular string) to
-   `image_paths` (plural array):
+Then:
 
-   | v0.1.0 call | v1.1.0 equivalent |
-   | --- | --- |
-   | `analyze_image` with `image_path: "/img.png"` | `process_images` with `image_paths: ["/img.png"]` |
-   | `compare_images` with two paths | `process_images` with `image_paths: ["/a.png", "/b.png"]` and a comparison prompt |
+1. Update the MCP `args` path to the new `index.js`.
+2. Keep your existing endpoint, model, and API key values.
+3. Replace old tool usage as shown below.
+4. Restart Claude Code.
+5. Run `claude mcp list`.
 
-   Note: comparisons now require an explicit prompt like "Compare these two
-   images and list the differences."
-
-4. **Restart Claude Code** and run `claude mcp list` to confirm
-   `vision-relay ... Connected`.
-
-5. Once confirmed working, you can delete the old v0.1.0 directory.
-
----
+| v0.1.0 | v1.1.0 |
+| --- | --- |
+| `analyze_image` + `image_path` | `process_images` + `image_paths` |
+| `compare_images` + two paths | `process_images` + paths + prompt |
 
 ## Security
 
-- Never commit real API keys. Use the MCP `env` block.
-- The server only calls VISION_BASE_URL. No telemetry, no caching, no disk
-  writes.
-- Rotate immediately if a key appears in logs, screenshots, or git history.
-
----
+- Never commit real API keys.
+- Keep secrets in the MCP `env` block or a secret manager.
+- The server only calls `VISION_BASE_URL`.
+- The server does not store images, cache results, or write analysis output.
+- Rotate a key immediately if it appears in logs, screenshots, or git history.
 
 ## Troubleshooting
 
+Basic checks:
+
 ```bash
-node --version          # ≥ 18?
-node --check index.js   # Syntax OK?
-node index.js           # Does it start without crashing?
+node --version
+node --check index.js
+claude mcp list
 ```
 
 | Symptom | Likely cause | Check |
 | --- | --- | --- |
-| Not in `claude mcp list` | Path/Node issue | Verify `args` path, `node --version` |
-| `Disconnected` | Crashed on start | Run `node index.js` manually |
-| "Missing env var(s)" | Config incomplete | Check all three required vars |
-| API 401/403 | Auth failed | Verify key, check VISION_PROVIDER |
-| API 404 | Wrong URL/model | Verify VISION_BASE_URL and model name |
-| API 4xx/5xx | Format/endpoint error | Switch provider, test with curl |
-| "Unsupported extension" | Bad format | Use png/jpg/jpeg/webp/gif/bmp |
-| "Image larger than X" | Size limit | Raise VISION_MAX_IMAGE_SIZE or compress |
-| File not found | Path error | Use absolute paths |
-
----
+| Not listed | Config path issue | Check `args` and restart Claude Code |
+| Disconnected | Startup crash | Run `node index.js` manually |
+| Missing env vars | Config incomplete | Check key, base URL, and model |
+| API 401 or 403 | Auth failed | Check API key and provider |
+| API 404 | Wrong URL or model | Check base URL and model name |
+| Format error | Provider mismatch | Switch `VISION_PROVIDER` |
+| Unsupported extension | Bad image format | Use png, jpg, webp, gif, or bmp |
+| File not found | Path error | Use absolute image paths |
+| Image too large | Size limit | Raise limit or compress the image |
 
 ## Project Structure
 
-```
+```text
 vision-relay-mcp/
-├── index.js          # Server (single file, ~240 lines)
+├── index.js
 ├── package.json
-├── README.md         # English + 中文
-├── README.zh-CN.md   # Chinese tutorial
-├── LICENSE           # MIT
+├── package-lock.json
+├── README.md
+├── README.zh-CN.md
+├── LICENSE
 ├── .env.example
 └── .gitignore
 ```
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT. See [LICENSE](./LICENSE).
 
 ---
 
 ## 中文说明
 
-1.1.0 是 v0.1.0 的**单入口升级版**，将 analyze_image 和 compare_images
-合并为一个 process_images 工具。行为由提示词驱动而非工具名决定。
+`1.1.0` 是 `v0.1.0` 的单入口升级版。
+
+它把旧版的 `analyze_image` 和 `compare_images` 合并为一个
+`process_images` 工具。单图、多图、OCR、对比、提取信息等任务都通过同一个
+入口处理，具体做什么由提示词决定。
 
 ### 项目简介
 
-Claude Code 不能直接看图片。Vision Relay MCP 是本地图片和视觉模型之间的桥梁：
+Claude Code 不能直接看图片。Vision Relay MCP 是本地图片和视觉模型之间的
+桥梁：
 
-```
-本地图片 → Vision Relay MCP → 视觉模型 API → 文本结果 → Claude Code
-```
-
-你只需配置好接口，Claude Code 调用 process_images 即可自动完成文件读取、
-编码、API 调用和结果返回。
-
-### 工作原理
-
-1. Claude Code 调用 process_images，传入图片路径和任务描述。
-2. 服务并发读取图片，校验后 base64 编码，构造对应格式的请求体。
-3. 视觉模型处理图片，返回文本。
-4. Claude Code 收到文本，继续对话。
-
-服务是单文件实现（index.js，约 240 行），不存储图片、不缓存、不回传数据。
-
-### 版本历史
-
-**v1.1.0（当前）：** 单入口升级。相比 v0.1.0 的变化：
-- 1 个工具取代 2 个
-- 支持任意张图片（v0.1.0：1 张或恰好 2 张）
-- 多图合并为一次请求（v0.1.0：顺序分开发送）
-- 并发读取文件（v0.1.0：顺序读取）
-- 可配置图片大小限制
-- 支持 OpenAI 兼容接口（v0.1.0：仅 Anthropic）
-
-**v0.1.0（第一版）：** 两个独立工具 — analyze_image（单图）和
-compare_images（双图对比）。
-
-| 方面 | v0.1.0 | v1.1.0 |
-| --- | --- | --- |
-| 工具数 | 2 | 1 |
-| 图片数 | 1 或恰好 2 | 1 张起 |
-| 请求策略 | 分开发送 | 合并一次 |
-| 文件读取 | 顺序 | 并发 |
-| 大小限制 | 无 | 可配置 |
-| 接口支持 | 仅 Anthropic | Anthropic + OpenAI |
-
-### 快速开始
-
-```bash
-# 1. 克隆项目
-git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
-cd vision-relay-mcp
-
-# 2. 安装依赖（仅一个包）
-npm install
-
-# 3. 验证语法（不会启动服务）
-npm run check
+```text
+本地图片 -> Vision Relay MCP -> 视觉模型 API -> 文本结果 -> Claude Code
 ```
 
-然后将服务添加到 Claude Code MCP 配置（见下方 [Claude Code 配置](#claude-code-配置)），重启 Claude Code，执行 claude mcp list 确认显示 Connected 即完成。
+Claude Code 调用 `process_images`，服务负责读取图片、校验格式、base64
+编码、调用接口并返回文本结果。
+
+服务是本地单文件实现，不存储图片、不缓存结果，也不会调用你配置之外的服务。
 
 ### 运行要求
 
-- Node.js ≥ 18.0.0
+- Node.js `18.0.0` 或更高版本
 - Claude Code 或其他 MCP 客户端
-- 支持视觉能力的 API 接口 + API key
-- VISION_MODEL 必须支持图片输入
+- 支持图片输入的视觉模型接口
+- 这个接口的 API key
+
+`VISION_MODEL` 必须是支持图片输入的模型。纯文本模型不能识图。
+
+### 安装
+
+```bash
+git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
+cd vision-relay-mcp
+npm install
+npm run check
+```
+
+`npm run check` 只检查语法，不会启动服务，也不会发起网络请求。
 
 ### 配置项
 
-所有配置通过环境变量传入，无需配置文件。必填三项：
+所有配置都通过环境变量传入。
 
-| 名称 | 必填 | 默认 | 说明 |
+| 名称 | 必填 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| VISION_API_KEY | 是 | — | 接口 API key |
-| VISION_BASE_URL | 是 | — | 接口地址，填基础地址即可，服务器会自动补全 API 路径 |
-| VISION_MODEL | 是 | — | 视觉模型名，必须支持图片输入 |
+| `VISION_PROVIDER` | 否 | `anthropic` | `anthropic` 或 `openai` |
+| `VISION_API_KEY` | 是 | 无 | API key |
+| `VISION_BASE_URL` | 是 | 无 | 接口基础地址 |
+| `VISION_MODEL` | 是 | 无 | 支持图片输入的模型名 |
+| `VISION_MAX_TOKENS` | 否 | `2000` | 最大返回 token |
+| `VISION_MAX_IMAGE_SIZE` | 否 | `0` | 单图大小上限 |
 
-选填（不改也能正常用）：
+API key 回退顺序：
 
-| 名称 | 必填 | 默认 | 说明 |
-| --- | --- | --- | --- |
-| VISION_PROVIDER | 否 | anthropic | anthropic 或 openai |
-| VISION_MAX_TOKENS | 否 | 2000 | 最大返回 token 数 |
-| VISION_MAX_IMAGE_SIZE | 否 | 0 | 单图大小上限（字节），0 = 不限制 |
-
-**URL 自动补全：**
-
-| Provider | 设置为 | 实际请求地址 |
-| --- | --- | --- |
-| anthropic | https://api.example.com | https://api.example.com/v1/messages |
-| openai | https://api.example.com | https://api.example.com/v1/chat/completions |
-
-如果设置了完整路径则直接使用，不再追加。API key 回退顺序：VISION_API_KEY → ANTHROPIC_API_KEY / OPENAI_API_KEY。
+```text
+VISION_API_KEY -> ANTHROPIC_API_KEY -> OPENAI_API_KEY
+```
 
 ### Claude Code 配置
 
-打开 Claude Code 的 MCP 配置文件，在 mcpServers 中添加以下内容：
+推荐使用 Claude Code CLI：
 
-- 用户级配置（推荐）：~/.claude/claude_desktop_config.json
-- 项目级配置：.claude/settings.json
+```bash
+claude mcp add -s user vision-relay \
+  -e VISION_PROVIDER=anthropic \
+  -e VISION_BASE_URL=https://your-relay.example.com \
+  -e VISION_MODEL=your-vision-model \
+  -e VISION_API_KEY=your_api_key_here \
+  -- node /absolute/path/to/vision-relay-mcp/index.js
+```
+
+Windows PowerShell 示例：
+
+```powershell
+claude mcp add -s user vision-relay `
+  -e VISION_PROVIDER=anthropic `
+  -e VISION_BASE_URL=https://your-relay.example.com `
+  -e VISION_MODEL=your-vision-model `
+  -e VISION_API_KEY=your_api_key_here `
+  -- node C:\path\to\vision-relay-mcp\index.js
+```
+
+也可以直接编辑 Claude Code 用户级配置文件：
+
+- Windows: `%USERPROFILE%\.claude.json`
+- macOS/Linux: `~/.claude.json`
+
+示例：
 
 ```json
 {
@@ -468,92 +447,109 @@ npm run check
       "env": {
         "VISION_PROVIDER": "anthropic",
         "VISION_BASE_URL": "https://your-relay.example.com",
-        "VISION_MODEL": "your-model",
-        "VISION_API_KEY": "your_key"
+        "VISION_MODEL": "your-vision-model",
+        "VISION_API_KEY": "your_api_key_here"
       }
     }
   }
 }
 ```
 
-要点：
-- args 必须用绝对路径。Windows：C:\Users\你\vision-relay-mcp\index.js，macOS/Linux：/Users/你/vision-relay-mcp/index.js
-- env 里的四个值换成你的真实信息。如果用 OpenAI 兼容接口，VISION_PROVIDER 改为 openai
-- 保存后重启 Claude Code，执行 claude mcp list 验证
-
-### 工具说明
-
-**process_images** — 通用视觉工具。输入：
+Windows JSON 路径需要转义反斜杠：
 
 ```json
-{ "image_paths": ["/abs/path/img.png"], "prompt": "提取可见文字。" }
+"args": ["C:\\path\\to\\vision-relay-mcp\\index.js"]
 ```
 
-| 字段 | 必填 | 说明 |
-| --- | --- | --- |
-| image_paths | 是 | 绝对路径数组，一次请求发送 |
-| prompt | 否 | 任务描述，不传时使用默认提示词 |
+保存后重启 Claude Code，再执行：
 
-**示例：**
+```bash
+claude mcp list
+```
 
-OCR：`{"image_paths": ["/abs/screenshot.png"], "prompt": "提取所有可见文字，保持阅读顺序。"}`
+看到 `vision-relay ... Connected` 就说明 MCP 已启动。
 
-对比：`{"image_paths": ["/abs/v1.png", "/abs/v2.png"], "prompt": "列出两张设计的所有视觉差异。"}`
+### 使用方式
 
-提取：`{"image_paths": ["/abs/form.jpg"], "prompt": "将可见字段提取为 JSON。"}`
+在 Claude Code 里直接说明图片路径和任务即可。
 
-多图：`{"image_paths": ["/abs/1.png","/abs/2.png","/abs/3.png"], "prompt": "这是顺序步骤，描述每一步。"}`
+单图 OCR：
 
-### 支持的格式
+```text
+请调用 vision-relay 分析这张截图，并提取所有文字：
+C:\path\to\screenshot.png
+```
 
-png、jpg/jpeg、webp、gif、bmp
+多图对比：
+
+```text
+请调用 vision-relay 对比这两张设计稿：
+C:\path\to\before.png
+C:\path\to\after.png
+```
+
+结构化提取：
+
+```text
+请调用 vision-relay 读取这张表单图片，并整理成 JSON：
+C:\path\to\form.jpg
+```
+
+底层工具输入格式：
+
+```json
+{
+  "image_paths": [
+    "/absolute/path/to/image-1.png",
+    "/absolute/path/to/image-2.jpg"
+  ],
+  "prompt": "比较这些图片，并提取可见文字。"
+}
+```
+
+如果不传 `prompt`，工具会使用默认提示词，让模型综合分析图片内容、文字、
+对象、颜色、布局和多图关系。
 
 ### 从 v0.1.0 升级
 
-1. **下载 v1.1.0** 到新目录（保留旧版本作为备份），执行 npm install。
-2. **更新 MCP 配置** — 把 args 路径改为 v1.1.0 的 index.js，环境变量保持不变。
-3. **替换调用方式** — 参数从 image_path（单数字符串）变为 image_paths（复数数组）：
+1. 下载 v1.1.0 到新目录。
+2. 执行 `npm install`。
+3. 把 MCP 配置里的 `args` 改成新版 `index.js` 路径。
+4. 保留原来的接口地址、模型名和 API key。
+5. 重启 Claude Code。
+6. 执行 `claude mcp list`。
 
-| v0.1.0 调用 | v1.1.0 等价 |
+旧版和新版对应关系：
+
+| v0.1.0 | v1.1.0 |
 | --- | --- |
-| analyze_image(image_path="路径") | process_images(image_paths=["路径"]) |
-| compare_images(两张路径) | process_images(两张路径) + 对比提示词 |
-
-4. **重启 Claude Code**，执行 claude mcp list 确认 Connected。
-5. 确认正常后删除旧版本。
-
-### 安全说明
-
-- 不要把 API key 写进代码或 README
-- 服务器仅访问你配置的接口，不收集数据
-- key 泄露后应立即轮换
+| `analyze_image` + 单张路径 | `process_images` + `image_paths` |
+| `compare_images` + 两张路径 | `process_images` + 两张路径 + 提示词 |
 
 ### 常见问题
 
-| 现象 | 原因 | 排查 |
+| 现象 | 常见原因 | 处理 |
 | --- | --- | --- |
-| 服务不显示 | 路径/Node 问题 | 确认 node ≥ 18，路径正确 |
-| Disconnected | 启动崩溃 | 手动执行 node index.js |
-| 缺少环境变量 | 配置不全 | 检查三个必填项 |
-| API 401/403 | 认证失败 | 检查 key 和 provider |
-| API 404 | URL/模型错误 | 检查地址和模型名 |
-| 格式不支持 | 扩展名不对 | 用 png/jpg/jpeg/webp/gif/bmp |
-| 文件太大 | 超限制 | 提高上限或压缩 |
-| 找不到文件 | 路径错误 | 使用绝对路径 |
+| 服务不显示 | 配置没加载 | 检查 `.claude.json` 并重启 |
+| Disconnected | 启动失败 | 手动运行 `node index.js` |
+| 缺少环境变量 | env 不完整 | 检查 key、base URL、model |
+| API 401/403 | 认证失败 | 检查 API key |
+| API 404 | 地址或模型错误 | 检查 base URL 和模型名 |
+| 格式错误 | provider 不匹配 | 切换 `VISION_PROVIDER` |
+| 找不到文件 | 图片路径错误 | 使用绝对路径 |
+| 图片过大 | 超过大小限制 | 压缩图片或提高限制 |
 
-### 项目结构
+### 安全说明
 
+- 不要把真实 API key 写进代码、README、截图或聊天记录。
+- 项目只会访问你配置的 `VISION_BASE_URL`。
+- 如果 key 泄露，应立即轮换。
+
+### 一句话总结
+
+```text
+Claude Code 负责对话和写代码
+Vision Relay MCP 负责把图片交给视觉模型
+视觉模型返回文字结果
+Claude Code 继续处理你的任务
 ```
-vision-relay-mcp/
-├── index.js          # 服务入口（单文件，约 240 行）
-├── package.json
-├── README.md         # 英文 + 中文
-├── README.zh-CN.md   # 小白教程
-├── LICENSE           # MIT
-├── .env.example
-└── .gitignore
-```
-
-### 许可证
-
-MIT — 详见 [LICENSE](./LICENSE)。
