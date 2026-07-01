@@ -395,7 +395,7 @@ MIT — see [LICENSE](./LICENSE).
 
 ## 中文说明
 
-`1.1.0` 是第一版 Vision Relay MCP 的**单入口升级版**，将原来的多个任务工具合并为一个通用入口。
+**1.1.0** 是第一版 Vision Relay MCP 的**单入口升级版**，将原来的多个任务工具合并为一个通用入口。
 
 ### 项目简介
 
@@ -407,7 +407,7 @@ Vision Relay MCP 就是这个桥梁：
 本地图片 → Vision Relay MCP → 视觉模型 API → 文本结果 → Claude Code
 ```
 
-你只需配置好视觉接口，Claude Code 调用 `process_images` 一个工具即可，剩下的（读取文件、编码、调用 API、返回结果）由服务自动完成。
+你只需配置好视觉接口，Claude Code 调用 **process_images** 一个工具即可，剩下的（读取文件、编码、调用 API、返回结果）由服务自动完成。
 
 ### 快速开始
 
@@ -427,13 +427,13 @@ npm run check
 
 ### 工作原理
 
-1. **Claude Code** 调用 `process_images` 工具，传入本地图片路径和任务描述。
+1. **Claude Code** 调用 **process_images** 工具，传入本地图片路径和任务描述。
 2. **Vision Relay MCP** 并发读取每张图片，校验格式和大小，编码为 base64。
-3. 根据 `VISION_PROVIDER` 构造对应格式的请求体，发往你配置的接口。
+3. 根据 **VISION_PROVIDER** 构造对应格式的请求体，发往你配置的接口。
 4. **视觉模型** 根据提示词处理图片，返回文本结果。
 5. **Claude Code** 收到文本，继续完成你的任务。
 
-服务端是单文件实现（`index.js`，约 240 行），除了环境变量无需任何配置文件。它不存储图片、不缓存结果、不向除你配置的接口之外的任何服务发送数据。
+服务端是单文件实现（**index.js**，约 240 行），除了环境变量无需任何配置文件。它不存储图片、不缓存结果、不向除你配置的接口之外的任何服务发送数据。
 
 ### 版本说明
 
@@ -443,7 +443,7 @@ npm run check
 
 #### v1.0.0（第一版）
 
-第一版有两个工具：`analyze_image`（单图分析）和 `compare_images`（双图对比）。
+第一版有两个工具：**analyze_image**（单图分析）和 **compare_images**（双图对比）。
 
 **版本对比：**
 
@@ -453,17 +453,17 @@ npm run check
 | 支持图片数 | 1 张或恰好 2 张 | 1 张起，无上限 |
 | 请求策略 | 一张图一次请求 | 多图合并在一次请求中 |
 | 文件读取 | 顺序读取 | 并发读取 |
-| 图片大小限制 | 无 | 可配置 `VISION_MAX_IMAGE_SIZE` |
+| 图片大小限制 | 无 | 可配置 **VISION_MAX_IMAGE_SIZE** |
 | 任务路由 | 由工具名决定 | 由提示词决定（模型自行判断） |
 
 ### 运行要求
 
-- **Node.js** `18.0.0` 或更高版本
+- **Node.js** 18.0.0 或更高版本
 - **Claude Code** 或其他支持 MCP 的客户端
 - 一个**支持视觉能力的 API 接口**（Anthropic Messages 或 OpenAI Chat Completions 格式）
 - 对应接口的 **API key**
 
-> `VISION_MODEL` 设置的模型**必须**支持图片输入。纯文本模型虽然能连上接口，但传图时会失败。
+> **VISION_MODEL** 设置的模型**必须**支持图片输入。纯文本模型虽然能连上接口，但传图时会失败。
 
 ### 安装
 
@@ -485,32 +485,32 @@ npm run check
 
 | 名称 | 必填 | 说明 |
 | --- | --- | --- |
-| `VISION_PROVIDER` | 否 | 接口格式：`anthropic` 或 `openai`，默认 `anthropic` |
-| `VISION_API_KEY` | 是 | 视觉接口或中转服务的 API key |
-| `VISION_BASE_URL` | 是 | 视觉接口或中转服务的 base URL |
-| `VISION_MODEL` | 是 | 支持视觉能力的模型名称 |
-| `VISION_MAX_TOKENS` | 否 | 最大输出 token 数，默认 `2000` |
-| `VISION_MAX_IMAGE_SIZE` | 否 | 单张图片的大小上限（字节），设为 `0` 则不限制 |
+| **VISION_PROVIDER** | 否 | 接口格式：**anthropic** 或 **openai**，默认 **anthropic** |
+| **VISION_API_KEY** | 是 | 视觉接口或中转服务的 API key |
+| **VISION_BASE_URL** | 是 | 视觉接口或中转服务的 base URL |
+| **VISION_MODEL** | 是 | 支持视觉能力的模型名称 |
+| **VISION_MAX_TOKENS** | 否 | 最大输出 token 数，默认 **2000** |
+| **VISION_MAX_IMAGE_SIZE** | 否 | 单张图片的大小上限（字节），设为 **0** 则不限制 |
 
 **URL 自动补全：**
 
-| Provider | 设置 `VISION_BASE_URL` 为 | 实际请求地址 |
+| Provider | 设置 **VISION_BASE_URL** 为 | 实际请求地址 |
 | --- | --- | --- |
-| `anthropic` | `https://api.example.com` | `https://api.example.com/v1/messages` |
-| `anthropic` | `https://api.example.com/v1` | `https://api.example.com/v1/messages` |
-| `openai` | `https://api.example.com` | `https://api.example.com/v1/chat/completions` |
-| `openai` | `https://api.example.com/v1` | `https://api.example.com/v1/chat/completions` |
+| **anthropic** | **https://api.example.com** | **https://api.example.com/v1/messages** |
+| **anthropic** | **https://api.example.com/v1** | **https://api.example.com/v1/messages** |
+| **openai** | **https://api.example.com** | **https://api.example.com/v1/chat/completions** |
+| **openai** | **https://api.example.com/v1** | **https://api.example.com/v1/chat/completions** |
 
-如果设置了完整路径（如末尾已包含 `/v1/messages`），服务会直接使用，不再追加。
+如果设置了完整路径（如末尾已包含 **/v1/messages**），服务会直接使用，不再追加。
 
 **API key 回退：**
 
-如果未设置 `VISION_API_KEY`，服务会依次尝试：
+如果未设置 **VISION_API_KEY**，服务会依次尝试：
 
-1. `ANTHROPIC_API_KEY`（当 `VISION_PROVIDER` 为 `anthropic` 时）
-2. `OPENAI_API_KEY`（当 `VISION_PROVIDER` 为 `openai` 时）
+1. **ANTHROPIC_API_KEY**（当 **VISION_PROVIDER** 为 **anthropic** 时）
+2. **OPENAI_API_KEY**（当 **VISION_PROVIDER** 为 **openai** 时）
 
-`VISION_API_KEY` 始终优先。
+**VISION_API_KEY** 始终优先。
 
 ### Claude Code 配置
 
@@ -574,11 +574,11 @@ npm run check
 claude mcp list
 ```
 
-确认显示 `vision-relay ... Connected` 即表示连接成功。如果显示 `Disconnected` 或服务不存在，请查看[常见问题](#常见问题)
+确认显示 **vision-relay ... Connected** 即表示连接成功。如果显示 **Disconnected** 或服务不存在，请查看[常见问题](#常见问题)
 
 ### 工具说明
 
-#### `process_images`
+#### process_images
 
 **描述：** 通用视觉工具，一次可处理一张或多张本地图片。用于 OCR、提取结构化信息、描述内容、回答问题、定位元素、总结截图，或多图推理。
 
@@ -593,8 +593,8 @@ claude mcp list
 
 | 字段 | 必填 | 说明 |
 | --- | --- | --- |
-| `image_paths` | 是 | 一张或多张本地图片路径，一次请求发送 |
-| `prompt` | 否 | 对这组图片要执行的任务，不传时使用通用提示词 |
+| **image_paths** | 是 | 一张或多张本地图片路径，一次请求发送 |
+| **prompt** | 否 | 对这组图片要执行的任务，不传时使用通用提示词 |
 
 **可复现示例：**
 
@@ -618,53 +618,53 @@ claude mcp list
 { "image_paths": ["/abs/path/to/1.png", "/abs/path/to/2.png", "/abs/path/to/3.png"], "prompt": "这三张截图展示了一个操作流程，请描述每一步发生了什么。" }
 ```
 
-不传 `prompt` 时，工具会要求模型综合描述图片内容、文字、对象、颜色、布局和跨图关系。
+不传 **prompt** 时，工具会要求模型综合描述图片内容、文字、对象、颜色、布局和跨图关系。
 
 ### 支持的图片格式
 
 | 扩展名 | MIME 类型 |
 | --- | --- |
-| `.png` | `image/png` |
-| `.jpg` / `.jpeg` | `image/jpeg` |
-| `.webp` | `image/webp` |
-| `.gif` | `image/gif` |
-| `.bmp` | `image/bmp` |
+| **.png** | **image/png** |
+| **.jpg** / **.jpeg** | **image/jpeg** |
+| **.webp** | **image/webp** |
+| **.gif** | **image/gif** |
+| **.bmp** | **image/bmp** |
 
 ### 从 v1.0.0 升级
 
 1. 下载或克隆 v1.1.0 到新目录（或替换旧目录）
-2. 执行 `npm install`
-3. 将 MCP 配置中的 `args` 路径改为 v1.1.0 的 `index.js`
+2. 执行 **npm install**
+3. 将 MCP 配置中的 **args** 路径改为 v1.1.0 的 **index.js**
 4. 保留原有环境变量，或按需更新
 5. 替换旧工具调用：
 
 | v1.0.0 调用方式 | v1.1.0 等价方式 |
 | --- | --- |
-| `analyze_image` + `image_path` | `process_images` + `image_paths: ["..."]` |
-| `compare_images` + 两张路径 | `process_images` + 两张路径 + 对比提示词 |
+| **analyze_image** + **image_path** | **process_images** + **image_paths: ["..."]** |
+| **compare_images** + 两张路径 | **process_images** + 两张路径 + 对比提示词 |
 
 6. 重启 Claude Code
-7. 执行 `claude mcp list`，确认 `vision-relay` 为 `Connected`
+7. 执行 **claude mcp list**，确认 **vision-relay** 为 **Connected**
 
 ### 安全说明
 
-- **不要提交真实 API key** — `.env.example` 只是模板，不是配置文件
-- **不要把密钥写进** `index.js`、README 或任何提交到版本控制的文件
-- **推荐放在 MCP 配置的 `env` 块**，或系统环境变量、密钥管理工具中
+- **不要提交真实 API key** — **.env.example** 只是模板，不是配置文件
+- **不要把密钥写进** **index.js**、README 或任何提交到版本控制的文件
+- **推荐放在 MCP 配置的 env 块**，或系统环境变量、密钥管理工具中
 - 如果密钥曾出现在聊天、日志、截图或公开仓库中，**应立即轮换**
-- 服务器仅向 `VISION_BASE_URL` 发起 HTTPS 请求，不会回传数据、收集遥测或与第三方通信
+- 服务器仅向 **VISION_BASE_URL** 发起 HTTPS 请求，不会回传数据、收集遥测或与第三方通信
 
 ### 常见问题
 
 | 现象 | 可能原因 | 排查方向 |
 | --- | --- | --- |
-| `claude mcp list` 看不到服务 | 路径或 Node.js 问题 | 确认 `node --version` ≥ 18；检查 `args` 是否指向 `index.js` |
-| 显示 `Disconnected` | 服务启动即崩溃 | 手动执行 `node index.js` 查看错误信息 |
-| 提示缺少环境变量 | 配置未设置 | 确认 `VISION_API_KEY`、`VISION_BASE_URL`、`VISION_MODEL` 均已配置 |
-| API 返回 4xx | 鉴权或格式错误 | 检查 API key 是否正确；确认 `VISION_PROVIDER` 与接口格式匹配 |
-| API 返回 5xx | 服务端异常 | 检查接口是否可达；用 `curl` 测试同样的 URL 和 key |
+| claude mcp list 看不到服务 | 路径或 Node.js 问题 | 确认 **node --version** ≥ 18；检查 **args** 是否指向 **index.js** |
+| 显示 Disconnected | 服务启动即崩溃 | 手动执行 **node index.js** 查看错误信息 |
+| 提示缺少环境变量 | 配置未设置 | 确认 **VISION_API_KEY**、**VISION_BASE_URL**、**VISION_MODEL** 均已配置 |
+| API 返回 4xx | 鉴权或格式错误 | 检查 API key 是否正确；确认 **VISION_PROVIDER** 与接口格式匹配 |
+| API 返回 5xx | 服务端异常 | 检查接口是否可达；用 **curl** 测试同样的 URL 和 key |
 | "Unsupported image extension" | 格式不支持 | 使用 png、jpg、jpeg、webp、gif 或 bmp |
-| "Image is larger than X MB" | 超过大小限制 | 提高 `VISION_MAX_IMAGE_SIZE` 或先压缩图片 |
+| "Image is larger than X MB" | 超过大小限制 | 提高 **VISION_MAX_IMAGE_SIZE** 或先压缩图片 |
 | 找不到图片 | 路径错误 | 使用绝对路径；相对路径取决于 MCP 服务的工作目录 |
 
 ### 项目结构
