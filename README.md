@@ -92,7 +92,7 @@ Local Image(s)  →  Vision Relay MCP  →  Vision API  →  Text Result  →  C
 When you send 3 images, the server issues 3 `readFile()` calls at the same
 time via `Promise.all()`. They resolve as the OS returns data — typically
 near-simultaneously for local SSD storage. This is a deliberate improvement
-over v1.0.0, which read files one after another.
+over v0.1.0, which read files one after another.
 
 ### Request Format Details
 
@@ -166,7 +166,7 @@ is perfectly capable of deciding what to do based on the prompt content.
 v1.1.0 embraces this by providing exactly one tool whose behavior is
 prompt-driven rather than hard-coded into the tool name.
 
-**Key changes from v1.0.0:**
+**Key changes from v0.1.0:**
 - Single tool (`process_images`) replaces two separate tools
 - Supports any number of images (1, 2, 10, 50 — no hard limit beyond API constraints)
 - All images sent in one API request instead of sequential calls
@@ -174,7 +174,7 @@ prompt-driven rather than hard-coded into the tool name.
 - Configurable per-image size limit via VISION_MAX_IMAGE_SIZE
 - Credentials read exclusively from environment variables
 
-### v1.0.0 (first version)
+### v0.1.0 (first version)
 
 The original release had two purpose-specific tools:
 
@@ -185,7 +185,7 @@ The original release had two purpose-specific tools:
 
 **Full comparison:**
 
-| Aspect | v1.0.0 | v1.1.0 |
+| Aspect | v0.1.0 | v1.1.0 |
 | --- | --- | --- |
 | Tool count | 2 | 1 |
 | Image count | 1 or exactly 2 | 1 or more (no upper limit) |
@@ -543,7 +543,7 @@ sending.
 
 ---
 
-## Upgrade From v1.0.0
+## Upgrade From v0.1.0
 
 ### Step-by-step Upgrade
 
@@ -557,7 +557,7 @@ sending.
    model has changed.
 5. **Replace old tool calls.** This is the only code change required:
 
-| v1.0.0 call | v1.1.0 equivalent |
+| v0.1.0 call | v1.1.0 equivalent |
 | --- | --- |
 | `analyze_image` with `image_path: "/path/to/img.png"` | `process_images` with `image_paths: ["/path/to/img.png"]` |
 | `compare_images` with `first_image_path` and `second_image_path` | `process_images` with `image_paths: ["/path/to/first.png", "/path/to/second.png"]` and a comparison prompt |
@@ -719,7 +719,7 @@ Vision Relay MCP 就是这个桥梁。它作为一个本地 MCP（Model Context 
 
 #### 并发读取的含义
 
-当你发送 3 张图片时，服务端同时发起 3 个 readFile() 调用。它们在操作系统返回数据时逐个完成——对于本地 SSD，几乎同时完成。这比 v1.0.0 的顺序读取（一张一张来）要快得多。
+当你发送 3 张图片时，服务端同时发起 3 个 readFile() 调用。它们在操作系统返回数据时逐个完成——对于本地 SSD，几乎同时完成。这比 v0.1.0 的顺序读取（一张一张来）要快得多。
 
 #### 请求格式详情
 
@@ -776,14 +776,14 @@ npm run check
 
 **设计理念：** 第一版按"单图分析"和"双图对比"拆分为两个 MCP 工具。实际上，"分析一张图"和"对比两张图"本质完全相同——都是"发送 N 张图片 + 提示词给 API"。视觉模型完全有能力根据提示词自行判断任务类型。v1.1.0 只提供一个入口，行为由提示词驱动而非工具名称。
 
-**相比 v1.0.0 的关键变化：**
+**相比 v0.1.0 的关键变化：**
 - 单一工具 process_images 取代两个独立工具
 - 支持任意张图片（1 张、2 张、10 张、50 张——无硬性上限，取决于 API 限制）
 - 所有图片合并为一次 API 请求，而非顺序调用
 - 并发读取文件（Promise.all），而非顺序读取
 - 可配置单图大小限制（VISION_MAX_IMAGE_SIZE）
 
-#### v1.0.0（第一版）
+#### v0.1.0（第一版）
 
 第一版有两个专用工具：
 
@@ -794,7 +794,7 @@ npm run check
 
 **完整对比：**
 
-| 方面 | v1.0.0 | v1.1.0 |
+| 方面 | v0.1.0 | v1.1.0 |
 | --- | --- | --- |
 | 工具数量 | 2 个 | 1 个 |
 | 支持图片数 | 1 张或恰好 2 张 | 1 张起，无上限 |
@@ -1013,7 +1013,7 @@ SVG、PDF、TIFF、HEIC 不支持。请先转换为 PNG 再发送。
 
 ---
 
-### 从 v1.0.0 升级
+### 从 v0.1.0 升级
 
 1. 下载或克隆 v1.1.0 到新目录（保留旧版本作为备份）
 2. 执行 `npm install`
@@ -1021,7 +1021,7 @@ SVG、PDF、TIFF、HEIC 不支持。请先转换为 PNG 再发送。
 4. 保留原有环境变量，或按需更新
 5. 替换旧工具调用：
 
-| v1.0.0 调用方式 | v1.1.0 等价方式 |
+| v0.1.0 调用方式 | v1.1.0 等价方式 |
 | --- | --- |
 | analyze_image + image_path | process_images + image_paths: ["..."] |
 | compare_images + 两张路径 | process_images + 两张路径 + 对比提示词 |
