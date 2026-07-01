@@ -369,43 +369,30 @@ MIT. See [LICENSE](./LICENSE).
 
 `1.1.0` 是 `v0.1.0` 的单入口升级版。
 
-它把旧版的 `analyze_image` 和 `compare_images` 合并为一个
-`process_images` 工具。单图、多图、OCR、对比、提取信息等任务都通过同一个
-入口处理，具体做什么由提示词决定。
+它把旧版的 `analyze_image` 和 `compare_images` 合并为一个 `process_images` 工具。单图、多图、OCR、对比、提取信息等任务都通过同一个入口处理，具体做什么由提示词决定。
 
 ### 相比第一版升级了什么
 
-- **入口更统一。** 第一版把单图分析和双图对比分成 `analyze_image`、
-  `compare_images` 两个工具。新版只保留 `process_images`，使用时不用先判断
-  该选哪个工具。
-- **任务不再被工具名限制。** 第一版的 `compare_images` 更像专门的图片对比。
-  新版由提示词决定任务，可以做 OCR、截图说明、设计稿对比、表单信息提取、
-  多图流程总结等。
-- **图片数量更灵活。** 第一版要么一张图，要么刚好两张图。新版的
-  `image_paths` 是数组，可以传一张，也可以传多张。
-- **多图放在同一次模型请求里。** 新版会把多张图片一起交给模型，让模型在同一
-  上下文里理解图片之间的关系。
-- **本地读图改为并发。** 多张图片会先并发读取和编码，再统一请求接口，多图场景
-  下准备速度更好。
-- **增加图片大小保护。** 可以通过 `VISION_MAX_IMAGE_SIZE` 设置单图大小上限，
-  避免过大的图片直接发到接口。
-- **接口兼容范围更广。** 第一版主要面向 Anthropic Messages 格式。新版支持
-  `anthropic` 和 `openai` 两种 provider，能接 Anthropic 兼容接口，也能接
-  OpenAI Chat Completions 兼容接口。
-- **文档更适合复现部署。** 新版补充了 Claude Code CLI、`.claude.json`、
-  Windows 路径转义、升级步骤、常见问题和隐私注意事项。
+- **入口更统一。** 第一版把单图分析和双图对比分成 `analyze_image`、`compare_images` 两个工具。新版只保留 `process_images`，使用时不用先判断该选哪个工具。
+- **任务不再被工具名限制。** 第一版的 `compare_images` 更像专门的图片对比。新版由提示词决定任务，可以做 OCR、截图说明、设计稿对比、表单信息提取、多图流程总结等。
+- **图片数量更灵活。** 第一版要么一张图，要么刚好两张图。新版的 `image_paths` 是数组，可以传一张，也可以传多张。
+- **多图放在同一次模型请求里。** 新版会把多张图片一起交给模型，让模型在同一上下文里理解图片之间的关系。
+- **本地读图改为并发。** 多张图片会先并发读取和编码，再统一请求接口，多图场景下准备速度更好。
+- **增加图片大小保护。** 可以通过 `VISION_MAX_IMAGE_SIZE` 设置单图大小上限，避免过大的图片直接发到接口。
+- **接口兼容范围更广。** 第一版主要面向 Anthropic Messages 格式。\
+  新版支持 `anthropic` 和 `openai` 两种 provider，\
+  能接 Anthropic 兼容接口，也能接 OpenAI Chat Completions 兼容接口。
+- **文档更适合复现部署。** 新版补充了 Claude Code CLI、`.claude.json`、Windows 路径转义、升级步骤、常见问题和隐私注意事项。
 
 ### 项目简介
 
-Claude Code 不能直接看图片。Vision Relay MCP 是本地图片和视觉模型之间的
-桥梁：
+Claude Code 不能直接看图片。Vision Relay MCP 是本地图片和视觉模型之间的桥梁：
 
 ```text
 本地图片 -> Vision Relay MCP -> 视觉模型 API -> 文本结果 -> Claude Code
 ```
 
-Claude Code 调用 `process_images`，服务负责读取图片、校验格式、base64
-编码、调用接口并返回文本结果。
+Claude Code 调用 `process_images`，服务负责读取图片、校验格式、base64 编码、调用接口并返回文本结果。
 
 服务是本地单文件实现，不存储图片、不缓存结果，也不会调用你配置之外的服务。
 
@@ -551,8 +538,7 @@ C:\path\to\form.jpg
 }
 ```
 
-如果不传 `prompt`，工具会使用默认提示词，让模型综合分析图片内容、文字、
-对象、颜色、布局和多图关系。
+如果不传 `prompt`，工具会使用默认提示词，让模型综合分析图片内容、文字、对象、颜色、布局和多图关系。
 
 ### 从 v0.1.0 升级
 
