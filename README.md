@@ -38,14 +38,20 @@ configure.
 ## Quick Start
 
 ```bash
+# 1. Clone the project
 git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
 cd vision-relay-mcp
+
+# 2. Install the single dependency
 npm install
+
+# 3. Verify the code parses correctly
 npm run check
 ```
 
-Then add the server to your Claude Code MCP configuration, restart, and
-verify with `claude mcp list`.
+Then add the server to your Claude Code MCP configuration (see [Claude Code
+Setup](#claude-code-setup)), restart Claude Code, and verify with
+`claude mcp list`. You should see `vision-relay ... Connected`.
 
 ---
 
@@ -93,14 +99,26 @@ Two purpose-specific tools: `analyze_image` (single image) and
 
 ## Install
 
+Clone the repository and install its single dependency:
+
 ```bash
 git clone https://github.com/zhoucoolboy/vision-relay-mcp.git
 cd vision-relay-mcp
 npm install
+```
+
+Verify the JavaScript parses without errors:
+
+```bash
 npm run check
 ```
 
-Single dependency: `@modelcontextprotocol/sdk`.
+This runs `node --check index.js` — it validates syntax without starting the
+server or making any network calls. No output means success.
+
+The only runtime dependency is
+[`@modelcontextprotocol/sdk`](https://www.npmjs.com/package/@modelcontextprotocol/sdk),
+which provides the MCP server framework. There is no build step.
 
 ---
 
@@ -134,10 +152,18 @@ If the URL already ends with the full path, it's used as-is.
 
 ## Claude Code Setup
 
-**User-level config:** `~/.claude/claude_desktop_config.json`
-**Project-level:** `.claude/settings.json`
+Add the server to your Claude Code MCP configuration. The config file location
+depends on your OS and preference:
 
-### Anthropic-compatible endpoint
+- **User-level** (applies to all projects, recommended for most users):
+  macOS: `~/.claude/claude_desktop_config.json`
+  Windows: `%USERPROFILE%\.claude\claude_desktop_config.json`
+- **Project-level** (only the current project): `.claude/settings.json`
+
+Open the file in any text editor and add a `vision-relay` entry under
+`mcpServers`. Replace the placeholder values with your actual configuration.
+
+**For Anthropic-compatible endpoints** (VISION_PROVIDER = anthropic):
 
 ```json
 {
@@ -157,7 +183,7 @@ If the URL already ends with the full path, it's used as-is.
 }
 ```
 
-### OpenAI-compatible endpoint
+**For OpenAI-compatible endpoints** (VISION_PROVIDER = openai):
 
 ```json
 {
@@ -177,12 +203,20 @@ If the URL already ends with the full path, it's used as-is.
 }
 ```
 
-**Paths must be absolute:**
+**Important details:**
 
-Windows: `"args": ["C:\\Users\\you\\vision-relay-mcp\\index.js"]`
-macOS / Linux: `"args": ["/Users/you/vision-relay-mcp/index.js"]`
-
-Restart Claude Code after changes, then verify: `claude mcp list`
+- The `args` path must be an **absolute path** to the `index.js` file from
+  step 1. Relative paths will not work because the MCP server's working
+  directory is unpredictable.
+  - Windows example: `C:\\Users\\yourname\\vision-relay-mcp\\index.js`
+  - macOS/Linux example: `/Users/yourname/vision-relay-mcp/index.js`
+- If the config file doesn't exist yet, create it with the full JSON
+  structure shown above.
+- After saving, **restart Claude Code** — MCP servers are loaded only at
+  startup.
+- Verify the connection by running `claude mcp list`. You should see
+  `vision-relay ... Connected`. If you see `Disconnected` or the server is
+  missing, run `node /path/to/index.js` manually to see the error.
 
 ---
 
@@ -241,19 +275,32 @@ Restart Claude Code after changes, then verify: `claude mcp list`
 
 ## Upgrade From v0.1.0
 
-1. Download v1.1.0, run `npm install`.
-2. Update MCP config `args` path to v1.1.0 `index.js`.
-3. Replace old calls:
+1. **Download v1.1.0** to a new directory (keep the old one as a backup):
+   ```bash
+   git clone https://github.com/zhoucoolboy/vision-relay-mcp.git vision-relay-mcp-v1.1
+   cd vision-relay-mcp-v1.1
+   npm install
+   ```
 
-| v0.1.0 | v1.1.0 |
-| --- | --- |
-| `analyze_image` + `image_path` | `process_images` + `image_paths: ["..."]` |
-| `compare_images` + two paths | `process_images` + `image_paths: ["...", "..."]` + prompt |
+2. **Update your MCP config** — change `args` to point to the v1.1.0
+   `index.js`. Keep your existing environment variables unchanged.
 
-4. Restart Claude Code, run `claude mcp list`.
+3. **Replace old tool invocations.** v1.1.0 has only `process_images`, and
+   the parameter changed from `image_path` (singular string) to
+   `image_paths` (plural array):
 
-Note: `image_path` (singular) → `image_paths` (plural array). Comparisons now
-require an explicit prompt.
+   | v0.1.0 call | v1.1.0 equivalent |
+   | --- | --- |
+   | `analyze_image` with `image_path: "/img.png"` | `process_images` with `image_paths: ["/img.png"]` |
+   | `compare_images` with two paths | `process_images` with `image_paths: ["/a.png", "/b.png"]` and a comparison prompt |
+
+   Note: comparisons now require an explicit prompt like "Compare these two
+   images and list the differences."
+
+4. **Restart Claude Code** and run `claude mcp list` to confirm
+   `vision-relay ... Connected`.
+
+5. Once confirmed working, you can delete the old v0.1.0 directory.
 
 ---
 
