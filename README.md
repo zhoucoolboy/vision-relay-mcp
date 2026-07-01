@@ -34,14 +34,30 @@ results, or call any service other than the endpoint you configure.
 v1.1.0 is a single-entry upgrade. It replaces the old `analyze_image` and
 `compare_images` tools with one prompt-driven tool: `process_images`.
 
-Changes from v0.1.0:
+Upgrade highlights from v0.1.0:
 
-- One tool instead of two
-- Supports one or more images in the same schema
-- Sends all images in one model request
-- Reads local image files concurrently with `Promise.all()`
-- Adds `VISION_MAX_IMAGE_SIZE` for optional per-image limits
-- Supports Anthropic-compatible and OpenAI-compatible vision APIs
+- **One reusable entry point.** v0.1.0 separated single-image analysis and
+  two-image comparison into two tools. v1.1.0 uses `process_images` for OCR,
+  comparison, screenshot explanation, information extraction, visual Q&A, and
+  any other image task the connected model can handle.
+- **Prompt-driven behavior.** The task is no longer limited by the tool name.
+  Tell the model what you need in `prompt`, such as "extract text",
+  "compare these screenshots", or "return structured JSON".
+- **Flexible image count.** v0.1.0 accepted one image for `analyze_image` or
+  exactly two images for `compare_images`. v1.1.0 accepts one or more image
+  paths in the same `image_paths` array.
+- **One combined model request.** Multi-image tasks are sent together so the
+  model can reason across all images in one context.
+- **Concurrent local file reading.** Multiple image files are read with
+  `Promise.all()` before the API call, reducing local preparation time for
+  multi-image requests.
+- **Optional image size guard.** `VISION_MAX_IMAGE_SIZE` can reject oversized
+  images before they are sent to the API.
+- **Broader endpoint compatibility.** v0.1.0 used the Anthropic Messages
+  format. v1.1.0 supports both Anthropic-compatible and OpenAI-compatible
+  vision endpoints.
+- **More portable documentation.** The setup guide now covers Claude Code CLI,
+  `.claude.json`, Windows path escaping, upgrade steps, and privacy guidance.
 
 ### v0.1.0 First Version
 
@@ -55,9 +71,11 @@ v0.1.0 exposed two task-specific tools:
 | Tools | 2 | 1 |
 | Images per call | 1 or exactly 2 | 1 or more |
 | Request strategy | Task-specific | Prompt-driven |
+| Multi-image handling | Limited to comparison | Any prompt-defined task |
 | File reading | Sequential | Concurrent |
 | Size limit | None | Optional |
 | API formats | Anthropic | Anthropic and OpenAI |
+| Setup docs | Basic | Step-by-step bilingual guides |
 
 ## Requirements
 
@@ -354,6 +372,28 @@ MIT. See [LICENSE](./LICENSE).
 它把旧版的 `analyze_image` 和 `compare_images` 合并为一个
 `process_images` 工具。单图、多图、OCR、对比、提取信息等任务都通过同一个
 入口处理，具体做什么由提示词决定。
+
+### 相比第一版升级了什么
+
+- **入口更统一。** 第一版把单图分析和双图对比分成 `analyze_image`、
+  `compare_images` 两个工具。新版只保留 `process_images`，使用时不用先判断
+  该选哪个工具。
+- **任务不再被工具名限制。** 第一版的 `compare_images` 更像专门的图片对比。
+  新版由提示词决定任务，可以做 OCR、截图说明、设计稿对比、表单信息提取、
+  多图流程总结等。
+- **图片数量更灵活。** 第一版要么一张图，要么刚好两张图。新版的
+  `image_paths` 是数组，可以传一张，也可以传多张。
+- **多图放在同一次模型请求里。** 新版会把多张图片一起交给模型，让模型在同一
+  上下文里理解图片之间的关系。
+- **本地读图改为并发。** 多张图片会先并发读取和编码，再统一请求接口，多图场景
+  下准备速度更好。
+- **增加图片大小保护。** 可以通过 `VISION_MAX_IMAGE_SIZE` 设置单图大小上限，
+  避免过大的图片直接发到接口。
+- **接口兼容范围更广。** 第一版主要面向 Anthropic Messages 格式。新版支持
+  `anthropic` 和 `openai` 两种 provider，能接 Anthropic 兼容接口，也能接
+  OpenAI Chat Completions 兼容接口。
+- **文档更适合复现部署。** 新版补充了 Claude Code CLI、`.claude.json`、
+  Windows 路径转义、升级步骤、常见问题和隐私注意事项。
 
 ### 项目简介
 
