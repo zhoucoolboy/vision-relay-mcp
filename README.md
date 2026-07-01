@@ -309,8 +309,8 @@ MIT — see [LICENSE](./LICENSE).
 
 ## 中文说明
 
-1.1.0 是 v0.1.0 的**单入口升级版**，将 `analyze_image` 和 `compare_images`
-合并为一个 `process_images` 工具。行为由提示词驱动而非工具名决定。
+1.1.0 是 v0.1.0 的**单入口升级版**，将 analyze_image 和 compare_images
+合并为一个 process_images 工具。行为由提示词驱动而非工具名决定。
 
 ### 项目简介
 
@@ -363,7 +363,7 @@ npm install
 npm run check
 ```
 
-然后配置 Claude Code MCP，重启，执行 `claude mcp list` 验证。
+然后配置 Claude Code MCP，重启，执行 claude mcp list 验证。
 
 ### 运行要求
 
@@ -398,8 +398,8 @@ npm run check
 
 ### Claude Code 配置
 
-用户级：`~/.claude/claude_desktop_config.json`
-项目级：`.claude/settings.json`
+- 用户级配置：~/.claude/claude_desktop_config.json
+- 项目级配置：.claude/settings.json
 
 ```json
 {
@@ -419,8 +419,8 @@ npm run check
 }
 ```
 
-路径必须用绝对路径。Windows 用 `C:\\Users\\...`，macOS/Linux 用 `/Users/...`。
-配置后重启 Claude Code，执行 `claude mcp list` 验证。
+路径必须用绝对路径。Windows：C:\Users\...，macOS/Linux：/Users/...。
+配置后重启 Claude Code，执行 claude mcp list 验证。
 
 ### 工具说明
 
@@ -451,7 +451,7 @@ png、jpg/jpeg、webp、gif、bmp
 
 ### 从 v0.1.0 升级
 
-1. 下载 v1.1.0，执行 `npm install`
+1. 下载 v1.1.0，执行 npm install
 2. 更新 MCP 路径指向 v1.1.0 的 index.js
 3. 替换调用方式：
 

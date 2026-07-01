@@ -61,16 +61,16 @@ npm run check                    # 没有报错就 OK
 | VISION_MAX_TOKENS | 2000 | 返回文本最大长度 |
 | VISION_MAX_IMAGE_SIZE | 0 | 单图大小上限（字节），0=不限制 |
 
-URL 会自动补全：填 `https://api.example.com`，实际请求 Anthropic 的
-`/v1/messages` 或 OpenAI 的 `/v1/chat/completions`。
+URL 会自动补全：填 https://api.example.com，实际请求 Anthropic 的
+/v1/messages 或 OpenAI 的 /v1/chat/completions。
 
 > 不要把 API key 写进代码或 README。
 
 ## 第 3 步：配置 Claude Code
 
 配置文件位置：
-- 用户级：`~/.claude/claude_desktop_config.json`
-- 项目级：`.claude/settings.json`
+- 用户级：~/.claude/claude_desktop_config.json
+- 项目级：.claude/settings.json
 
 ```json
 {
@@ -90,8 +90,8 @@ URL 会自动补全：填 `https://api.example.com`，实际请求 Anthropic 的
 }
 ```
 
-路径必须绝对路径。Windows：`C:\\Users\\你\\vision-relay-mcp\\index.js`
-macOS/Linux：`/Users/你/vision-relay-mcp/index.js`
+路径必须绝对路径。Windows：C:\Users\你\vision-relay-mcp\index.js
+macOS/Linux：/Users/你/vision-relay-mcp/index.js
 
 配置完**重启 Claude Code**。
 
@@ -101,7 +101,7 @@ macOS/Linux：`/Users/你/vision-relay-mcp/index.js`
 claude mcp list
 ```
 
-看到 `vision-relay ... Connected` 即成功。
+看到 vision-relay ... Connected 即成功。
 
 > Connected 只代表服务启动了，不代表接口配置正确。实际识图时才会调接口。
 
@@ -131,7 +131,7 @@ claude mcp list
 
 ## 从 v0.1.0 升级
 
-1. 下载 v1.1.0，执行 `npm install`
+1. 下载 v1.1.0，执行 npm install
 2. 更新 MCP 路径指向 v1.1.0 的 index.js
 3. 替换调用：
 
@@ -152,12 +152,12 @@ claude mcp list
 - VISION_PROVIDER 和接口格式不匹配
 - 图片路径不存在或格式不支持
 
-手动执行 `node index.js` 看报错信息。
+手动执行 node index.js 看报错信息。
 
 ### 2. provider 怎么选？
 
-- Anthropic Messages 格式 → `anthropic`
-- OpenAI Chat Completions 格式 → `openai`
+- Anthropic Messages 格式 → anthropic
+- OpenAI Chat Completions 格式 → openai
 
 不确定的话两个都试试。
 
@@ -167,7 +167,7 @@ MCP 服务的工作目录不确定，绝对路径最稳。
 
 ### 4. key 放哪最安全？
 
-MCP 配置的 `env` 块里。不要写进代码或 README。
+MCP 配置的 env 块里。不要写进代码或 README。
 
 ### 5. 怎么卸载？
 
